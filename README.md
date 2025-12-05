@@ -1,5 +1,5 @@
 # Usage Examples
-
+This will be my rules for Claude, Codex, and Gemini. No Grok
 ### Combining Rule Sets
 ```bash
 # For a React project, combine these rules:
