@@ -38,6 +38,12 @@ Feature: Claude Code integration
     Then coverage analysis, test design, TDD workflows, and flaky test debugging are supported
     And the status is "completed"
 
+  Scenario: Independent Validator Agent
+    Given a feature candidate is frozen at an immutable revision
+    When the independent validator is assigned approved validation work
+    Then a validator who did not implement the candidate checks that revision without modifying it and returns evidence-backed results
+    And the status is "completed"
+
   Scenario: Code Simplification Architect Agent
     Given existing code is complex or hard to maintain
     When the code simplification architect is used
@@ -82,6 +88,12 @@ Feature: Codex integration
     Then test matrices and coverage gaps are assessed with flaky test triage
     And the status is "completed"
 
+  Scenario: Validate Feature Candidate Skill
+    Given a Codex feature candidate is frozen at an immutable revision
+    When the validate feature candidate skill is used by an independent validator
+    Then approved checks produce a structured, evidence-backed result without changing the candidate
+    And the status is "completed"
+
   Scenario: Code Simplification Architect Skill
     Given refactoring is needed without changing behavior
     When the code simplification architect skill is used
@@ -110,6 +122,15 @@ Feature: Codex integration
     Given app localization work is required
     When the app localization skill is used
     Then string extraction, translation resources, placeholders, plurals, and layout validation are handled
+    And the status is "completed"
+
+Feature: Independent feature validation
+
+  Scenario: Tool-neutral versioned contracts and outcome semantics
+    Given Claude and Codex validators share versioned assignment and result contracts
+    When an immutable feature candidate is independently validated
+    Then the canonical assignment digest, assigned and inspected revisions, checks, command results, findings, evidence, failure signatures, and validator metadata are recorded
+    And pass means the acceptance criteria are satisfied, fail means the candidate violates them, and error means validation could not complete reliably
     And the status is "completed"
 
 Feature: Documentation and metadata

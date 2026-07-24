@@ -1,0 +1,121 @@
+{
+  "contractVersion": "1.0.0",
+  "assignmentId": "IVA-EXAMPLE-001",
+  "assignmentDigest": "sha256:044a483fec708b7bfc1215a8a67b62ff79dc09aa3e7ce0b47e45b2ed77f696ab",
+  "inspectedRevision": {
+    "vcs": "git",
+    "algorithm": "sha1",
+    "commit": "1111111111111111111111111111111111111111"
+  },
+  "outcome": "pass",
+  "summary": "Both acceptance criteria passed against the assigned immutable revision.",
+  "revisionVerification": {
+    "status": "verified",
+    "postCheckRevision": {
+      "vcs": "git",
+      "algorithm": "sha1",
+      "commit": "1111111111111111111111111111111111111111"
+    },
+    "cleanBeforeChecks": true,
+    "cleanAfterChecks": true,
+    "evidenceIds": [
+      "E-REVISION"
+    ]
+  },
+  "executedChecks": [
+    {
+      "id": "CHK-SCHEMAS",
+      "criterionId": "AC-SCHEMAS",
+      "status": "pass",
+      "summary": "The focused schema-validation tests passed.",
+      "commandResultIds": [
+        "CR-SCHEMA-TEST"
+      ],
+      "evidenceIds": [
+        "E-SCHEMA-PASS"
+      ]
+    },
+    {
+      "id": "CHK-SEMANTICS",
+      "criterionId": "AC-SEMANTICS",
+      "status": "pass",
+      "summary": "The focused semantic-validation tests passed.",
+      "commandResultIds": [
+        "CR-SEMANTIC-TEST"
+      ],
+      "evidenceIds": [
+        "E-SEMANTIC-PASS"
+      ]
+    }
+  ],
+  "commandResults": [
+    {
+      "id": "CR-SCHEMA-TEST",
+      "commandId": "CMD-SCHEMA-TEST",
+      "argv": [
+        "node",
+        "--test",
+        "--test-name-pattern=schemas",
+        "tests/independent-validator-contracts.test.js"
+      ],
+      "workingDirectory": ".",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 184,
+      "evidenceIds": [
+        "E-SCHEMA-PASS"
+      ]
+    },
+    {
+      "id": "CR-SEMANTIC-TEST",
+      "commandId": "CMD-SEMANTIC-TEST",
+      "argv": [
+        "node",
+        "--test",
+        "--test-name-pattern=semantic",
+        "tests/independent-validator-contracts.test.js"
+      ],
+      "workingDirectory": ".",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 192,
+      "evidenceIds": [
+        "E-SEMANTIC-PASS"
+      ]
+    }
+  ],
+  "findings": [],
+  "evidence": [
+    {
+      "id": "E-REVISION",
+      "kind": "revisionProof",
+      "summary": "The inspected revision matched the assignment before and after validation, and the candidate remained clean.",
+      "digest": "sha256:ee585bb827561caa7c6cdf7686ea238518ec04e8ef1396b996227a86a484acc1",
+      "excerpt": "assigned=1111111111111111111111111111111111111111 inspected=1111111111111111111111111111111111111111 post_check=1111111111111111111111111111111111111111 clean_before=true clean_after=true"
+    },
+    {
+      "id": "E-SCHEMA-PASS",
+      "kind": "commandOutput",
+      "summary": "The focused schema-validation tests passed.",
+      "digest": "sha256:6055a946863abd286268e49125d74052f6b4ec4b42d0d0fb8d3c35e402b7d5d8",
+      "excerpt": "TAP version 13\n# tests 4\n# pass 4\n# fail 0",
+      "commandId": "CMD-SCHEMA-TEST"
+    },
+    {
+      "id": "E-SEMANTIC-PASS",
+      "kind": "commandOutput",
+      "summary": "The focused semantic-validation tests passed.",
+      "digest": "sha256:992956bdedeef16d2e11b05846360cada5ae5c19962653f2bb12c2d448db8728",
+      "excerpt": "TAP version 13\n# tests 10\n# pass 10\n# fail 0",
+      "commandId": "CMD-SEMANTIC-TEST"
+    }
+  ],
+  "errors": [],
+  "failureSignatures": [],
+  "validatorMetadata": {
+    "validatorId": "validator-example-07",
+    "tool": "codex/independent-validator-v1",
+    "implementedCandidate": false,
+    "independenceAttested": true
+  }
+}

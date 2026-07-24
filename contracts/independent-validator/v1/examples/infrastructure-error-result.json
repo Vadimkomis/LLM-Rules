@@ -1,0 +1,116 @@
+{
+  "contractVersion": "1.0.0",
+  "assignmentId": "IVA-EXAMPLE-001",
+  "assignmentDigest": "sha256:044a483fec708b7bfc1215a8a67b62ff79dc09aa3e7ce0b47e45b2ed77f696ab",
+  "inspectedRevision": {
+    "vcs": "git",
+    "algorithm": "sha1",
+    "commit": "1111111111111111111111111111111111111111"
+  },
+  "outcome": "error",
+  "summary": "Validation could not conclude because an approved command could not start.",
+  "revisionVerification": {
+    "status": "verified",
+    "postCheckRevision": {
+      "vcs": "git",
+      "algorithm": "sha1",
+      "commit": "1111111111111111111111111111111111111111"
+    },
+    "cleanBeforeChecks": true,
+    "cleanAfterChecks": true,
+    "evidenceIds": [
+      "E-REVISION"
+    ]
+  },
+  "executedChecks": [
+    {
+      "id": "CHK-SCHEMAS",
+      "criterionId": "AC-SCHEMAS",
+      "status": "error",
+      "summary": "The schema-validation check produced no candidate verdict because its executable was unavailable.",
+      "commandResultIds": [
+        "CR-SCHEMA-TEST"
+      ],
+      "evidenceIds": [
+        "E-SPAWN-ERROR"
+      ]
+    }
+  ],
+  "commandResults": [
+    {
+      "id": "CR-SCHEMA-TEST",
+      "commandId": "CMD-SCHEMA-TEST",
+      "argv": [
+        "node",
+        "--test",
+        "--test-name-pattern=schemas",
+        "tests/independent-validator-contracts.test.js"
+      ],
+      "workingDirectory": ".",
+      "status": "error",
+      "exitCode": null,
+      "durationMs": 2,
+      "evidenceIds": [
+        "E-SPAWN-ERROR"
+      ]
+    }
+  ],
+  "findings": [],
+  "evidence": [
+    {
+      "id": "E-REVISION",
+      "kind": "revisionProof",
+      "summary": "The inspected revision matched the assignment before and after validation, and the candidate remained clean.",
+      "digest": "sha256:ee585bb827561caa7c6cdf7686ea238518ec04e8ef1396b996227a86a484acc1",
+      "excerpt": "assigned=1111111111111111111111111111111111111111 inspected=1111111111111111111111111111111111111111 post_check=1111111111111111111111111111111111111111 clean_before=true clean_after=true"
+    },
+    {
+      "id": "E-SPAWN-ERROR",
+      "kind": "commandOutput",
+      "summary": "The operating system reported that the approved executable was unavailable.",
+      "digest": "sha256:835141e628c36b36c9232a1355bd97fd062d4cfc1e22c6b04823ded41ab9ee0b",
+      "excerpt": "spawn node ENOENT",
+      "commandId": "CMD-SCHEMA-TEST"
+    }
+  ],
+  "errors": [
+    {
+      "id": "ERR-SCHEMA-TEST-SPAWN",
+      "stage": "execution",
+      "code": "EXECUTABLE_NOT_FOUND",
+      "message": "The approved schema-validation command could not start because its executable was unavailable.",
+      "evidenceIds": [
+        "E-SPAWN-ERROR"
+      ],
+      "failureSignatureId": "SIG-SCHEMA-TEST-SPAWN",
+      "commandResultId": "CR-SCHEMA-TEST"
+    }
+  ],
+  "failureSignatures": [
+    {
+      "id": "SIG-SCHEMA-TEST-SPAWN",
+      "value": "sha256:b0213b6694b573bdb1f2ce64ae963731fae4c94ceccff338a99eb04a76dfc820",
+      "basis": {
+        "namespace": "independent-validator/v1",
+        "sourceType": "error",
+        "sourceId": "ERR-SCHEMA-TEST-SPAWN",
+        "code": "EXECUTABLE_NOT_FOUND",
+        "context": {
+          "criterionIds": [
+            "AC-SCHEMAS"
+          ],
+          "commandIds": [
+            "CMD-SCHEMA-TEST"
+          ],
+          "artifactPaths": []
+        }
+      }
+    }
+  ],
+  "validatorMetadata": {
+    "validatorId": "validator-example-07",
+    "tool": "codex/independent-validator-v1",
+    "implementedCandidate": false,
+    "independenceAttested": true
+  }
+}

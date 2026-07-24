@@ -201,6 +201,7 @@ Use these specialized agents (via the Task tool) for targeted work. Each agent r
 | `architecture-reviewer` | **Before** implementing significant changes — validates design, evaluates trade-offs, catches structural issues early |
 | `senior-code-reviewer` | **After** completing a feature or logical chunk of code — reviews for bugs, security, performance, and maintainability |
 | `senior-qa-engineer` | When you need test coverage analysis, test case design, TDD workflows, or flaky test debugging |
+| `independent-validator` | **After** a feature candidate is frozen at an immutable revision — independently runs approved checks without modifying the candidate and returns an evidence-backed pass, fail, or error result |
 | `code-simplification-architect` | When code works but is messy — simplifies nested logic, breaks down god classes, eliminates duplication |
 | `github-actions-engineer` | For creating, debugging, or optimizing GitHub Actions workflows and CI/CD pipelines |
 | `red-team-analyst` | **After** implementing security-sensitive features — adversarial review simulating how a hacker would break, exploit, or abuse the system |
@@ -212,6 +213,7 @@ Use these specialized agents (via the Task tool) for targeted work. Each agent r
 3. **Review** — use `senior-code-reviewer` to catch issues
 4. **Test** — use `senior-qa-engineer` to ensure coverage
 5. **Simplify** — use `code-simplification-architect` if the result is complex
+6. **Validate** — freeze the candidate at an immutable revision, then use `independent-validator` for evidence-backed validation
 
 ### Bug Fixes
 When I report a bug, don't start by trying to fix it. Instead, start by writing a test that reproduces the bug. Then have subagents try to fix the bug and prove it with a passing test. 

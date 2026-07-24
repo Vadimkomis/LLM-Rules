@@ -6,6 +6,21 @@ This project follows Semantic Versioning. The structure below is inspired by Kee
 
 ## [Unreleased]
 
+### Added
+- Added an independent validation capability shared across Claude and Codex:
+  - `Claude/agents/independent-validator.md` for evidence-backed validation by a role that did not implement or modify the candidate.
+  - `Codex/skills/validate-feature-candidate/SKILL.md` for the equivalent reusable workflow.
+  - Versioned v1 assignment and result JSON Schemas with pass/fail/error examples and deterministic failure signatures under `contracts/independent-validator/v1`.
+  - Automated schema validation and contract tests.
+
+### Changed
+- Added independent validation as the final documented workflow gate.
+- Updated `ai-playbook init` to install the shared contracts and pair-level
+  checker without changing its established Codex or Claude destinations.
+  Updated `doctor` to integrity-check the schemas, checker, and installed Codex
+  validator skill and to reject altered managed files.
+- Excluded machine-local Claude permission overrides from published packages.
+
 ## [1.0.4] - 2026-03-31
 
 ### Changed

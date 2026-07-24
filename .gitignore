@@ -12,3 +12,7 @@
 # Temporary directories
 .tmp/
 .temp/
+
+# Installed dependencies
+node_modules/
+.pnpm-store/

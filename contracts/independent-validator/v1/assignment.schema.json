@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Vadimkomis/ai-playbook/main/contracts/independent-validator/v1/assignment.schema.json",
+  "title": "Independent Validator Assignment v1",
+  "description": "Assigns independent, non-remediating validation of one immutable Git revision.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "assignmentId",
+    "candidateRevision",
+    "repositoryContext",
+    "acceptanceCriteria",
+    "approvedValidationCommands",
+    "constraints",
+    "relevantArtifactPaths"
+  ],
+  "properties": {
+    "contractVersion": {
+      "const": "1.0.0"
+    },
+    "assignmentId": {
+      "$ref": "#/$defs/identifier"
+    },
+    "candidateRevision": {
+      "$ref": "#/$defs/gitRevision"
+    },
+    "repositoryContext": {
+      "$ref": "#/$defs/repositoryContext"
+    },
+    "acceptanceCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/acceptanceCriterion"
+      }
+    },
+    "approvedValidationCommands": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/approvedCommand"
+      }
+    },
+    "constraints": {
+      "$ref": "#/$defs/constraints"
+    },
+    "relevantArtifactPaths": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifactPath"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\\\]+$"
+    },
+    "gitRevision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "vcs",
+        "algorithm",
+        "commit"
+      ],
+      "properties": {
+        "vcs": {
+          "const": "git"
+        },
+        "algorithm": {
+          "enum": [
+            "sha1",
+            "sha256"
+          ]
+        },
+        "commit": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "algorithm": {
+                "const": "sha1"
+              }
+            },
+            "required": [
+              "algorithm"
+            ]
+          },
+          "then": {
+            "properties": {
+              "commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "algorithm": {
+                "const": "sha256"
+              }
+            },
+            "required": [
+              "algorithm"
+            ]
+          },
+          "then": {
+            "properties": {
+              "commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "repositoryContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repositoryRoot",
+        "contextNotes"
+      ],
+      "properties": {
+        "repositoryRoot": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "contextNotes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        }
+      }
+    },
+    "acceptanceCriterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "description",
+        "evidenceRequirements"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "description": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "evidenceRequirements": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "properties": {
+            "commandOutput": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "artifactContent": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "revisionProof": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "observation": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        }
+      }
+    },
+    "approvedCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "argv",
+        "workingDirectory",
+        "timeoutMs",
+        "expectedExitCodes",
+        "criterionIds"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "workingDirectory": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expectedExitCodes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "criterionIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateMustRemainUnmodified",
+        "validatorMustNotHaveImplementedCandidate",
+        "additionalConstraints"
+      ],
+      "properties": {
+        "candidateMustRemainUnmodified": {
+          "const": true
+        },
+        "validatorMustNotHaveImplementedCandidate": {
+          "const": true
+        },
+        "additionalConstraints": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        }
+      }
+    },
+    "artifactPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "purpose"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "purpose": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    }
+  }
+}

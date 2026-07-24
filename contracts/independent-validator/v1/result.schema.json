@@ -1,0 +1,646 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Vadimkomis/ai-playbook/main/contracts/independent-validator/v1/result.schema.json",
+  "title": "Independent Validator Result v1",
+  "description": "Reports an evidence-backed pass, fail, or error for one validator assignment.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "assignmentId",
+    "assignmentDigest",
+    "inspectedRevision",
+    "outcome",
+    "summary",
+    "revisionVerification",
+    "executedChecks",
+    "commandResults",
+    "findings",
+    "evidence",
+    "errors",
+    "failureSignatures",
+    "validatorMetadata"
+  ],
+  "properties": {
+    "contractVersion": {
+      "const": "1.0.0"
+    },
+    "assignmentId": {
+      "$ref": "#/$defs/identifier"
+    },
+    "assignmentDigest": {
+      "$ref": "#/$defs/sha256Digest"
+    },
+    "inspectedRevision": {
+      "$ref": "#/$defs/nullableGitRevision"
+    },
+    "outcome": {
+      "enum": [
+        "pass",
+        "fail",
+        "error"
+      ]
+    },
+    "summary": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "revisionVerification": {
+      "$ref": "#/$defs/revisionVerification"
+    },
+    "executedChecks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/executedCheck"
+      }
+    },
+    "commandResults": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/commandResult"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/validationError"
+      }
+    },
+    "failureSignatures": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/failureSignature"
+      }
+    },
+    "validatorMetadata": {
+      "$ref": "#/$defs/validatorMetadata"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\\\]+$"
+    },
+    "sha256Digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "gitRevision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "vcs",
+        "algorithm",
+        "commit"
+      ],
+      "properties": {
+        "vcs": {
+          "const": "git"
+        },
+        "algorithm": {
+          "enum": [
+            "sha1",
+            "sha256"
+          ]
+        },
+        "commit": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "algorithm": {
+                "const": "sha1"
+              }
+            },
+            "required": [
+              "algorithm"
+            ]
+          },
+          "then": {
+            "properties": {
+              "commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "algorithm": {
+                "const": "sha256"
+              }
+            },
+            "required": [
+              "algorithm"
+            ]
+          },
+          "then": {
+            "properties": {
+              "commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "nullableGitRevision": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/gitRevision"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "revisionVerification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "postCheckRevision",
+        "cleanBeforeChecks",
+        "cleanAfterChecks",
+        "evidenceIds"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "verified",
+            "mismatch",
+            "unavailable"
+          ]
+        },
+        "postCheckRevision": {
+          "$ref": "#/$defs/nullableGitRevision"
+        },
+        "cleanBeforeChecks": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "cleanAfterChecks": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "evidenceIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        }
+      }
+    },
+    "executedCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "criterionId",
+        "status",
+        "summary",
+        "commandResultIds",
+        "evidenceIds"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "criterionId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "error"
+          ]
+        },
+        "summary": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "commandResultIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        }
+      }
+    },
+    "commandResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "commandId",
+        "argv",
+        "workingDirectory",
+        "status",
+        "exitCode",
+        "durationMs",
+        "evidenceIds"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "commandId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "workingDirectory": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "error"
+          ]
+        },
+        "exitCode": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 255
+        },
+        "durationMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "exitCode"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "pass",
+                "fail"
+              ]
+            },
+            "exitCode": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "exitCode"
+          ],
+          "properties": {
+            "status": {
+              "const": "error"
+            },
+            "exitCode": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "severity",
+        "code",
+        "title",
+        "description",
+        "expected",
+        "actual",
+        "criterionIds",
+        "evidenceIds",
+        "failureSignatureId"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "severity": {
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "code": {
+          "$ref": "#/$defs/identifier"
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "description": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "expected": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "actual": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "criterionIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "location": {
+          "$ref": "#/$defs/location"
+        },
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "failureSignatureId": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "summary",
+        "digest",
+        "excerpt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "kind": {
+          "enum": [
+            "commandOutput",
+            "artifactContent",
+            "revisionProof",
+            "observation"
+          ]
+        },
+        "summary": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "digest": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "excerpt": {
+          "type": "string"
+        },
+        "commandId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "artifactPath": {
+          "$ref": "#/$defs/relativePath"
+        }
+      }
+    },
+    "validationError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "stage",
+        "code",
+        "message",
+        "evidenceIds",
+        "failureSignatureId"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "stage": {
+          "enum": [
+            "assignment",
+            "revision",
+            "execution",
+            "evidence",
+            "finalization"
+          ]
+        },
+        "code": {
+          "$ref": "#/$defs/identifier"
+        },
+        "message": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "commandResultId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "failureSignatureId": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "signatureContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "criterionIds",
+        "commandIds",
+        "artifactPaths"
+      ],
+      "properties": {
+        "criterionIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "commandIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "artifactPaths": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/relativePath"
+          }
+        }
+      }
+    },
+    "failureSignature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "value",
+        "basis"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "value": {
+          "$ref": "#/$defs/sha256Digest"
+        },
+        "basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "namespace",
+            "sourceType",
+            "sourceId",
+            "code",
+            "context"
+          ],
+          "properties": {
+            "namespace": {
+              "const": "independent-validator/v1"
+            },
+            "sourceType": {
+              "enum": [
+                "finding",
+                "error"
+              ]
+            },
+            "sourceId": {
+              "$ref": "#/$defs/identifier"
+            },
+            "code": {
+              "$ref": "#/$defs/identifier"
+            },
+            "context": {
+              "$ref": "#/$defs/signatureContext"
+            }
+          }
+        }
+      }
+    },
+    "validatorMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validatorId",
+        "tool",
+        "implementedCandidate",
+        "independenceAttested"
+      ],
+      "properties": {
+        "validatorId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "tool": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "implementedCandidate": {
+          "const": false
+        },
+        "independenceAttested": {
+          "const": true
+        },
+        "notes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        }
+      }
+    }
+  }
+}

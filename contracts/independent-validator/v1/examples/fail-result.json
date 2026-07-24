@@ -1,0 +1,174 @@
+{
+  "contractVersion": "1.0.0",
+  "assignmentId": "IVA-EXAMPLE-001",
+  "assignmentDigest": "sha256:044a483fec708b7bfc1215a8a67b62ff79dc09aa3e7ce0b47e45b2ed77f696ab",
+  "inspectedRevision": {
+    "vcs": "git",
+    "algorithm": "sha1",
+    "commit": "1111111111111111111111111111111111111111"
+  },
+  "outcome": "fail",
+  "summary": "The candidate failed because the semantic checker did not enforce deterministic failure signatures.",
+  "revisionVerification": {
+    "status": "verified",
+    "postCheckRevision": {
+      "vcs": "git",
+      "algorithm": "sha1",
+      "commit": "1111111111111111111111111111111111111111"
+    },
+    "cleanBeforeChecks": true,
+    "cleanAfterChecks": true,
+    "evidenceIds": [
+      "E-REVISION"
+    ]
+  },
+  "executedChecks": [
+    {
+      "id": "CHK-SCHEMAS",
+      "criterionId": "AC-SCHEMAS",
+      "status": "pass",
+      "summary": "The focused schema-validation tests passed.",
+      "commandResultIds": [
+        "CR-SCHEMA-TEST"
+      ],
+      "evidenceIds": [
+        "E-SCHEMA-PASS"
+      ]
+    },
+    {
+      "id": "CHK-SEMANTICS",
+      "criterionId": "AC-SEMANTICS",
+      "status": "fail",
+      "summary": "The semantic-validation tests exposed a missing failure-signature rule.",
+      "commandResultIds": [
+        "CR-SEMANTIC-TEST"
+      ],
+      "evidenceIds": [
+        "E-SEMANTIC-FAIL",
+        "E-CHECKER-SOURCE"
+      ]
+    }
+  ],
+  "commandResults": [
+    {
+      "id": "CR-SCHEMA-TEST",
+      "commandId": "CMD-SCHEMA-TEST",
+      "argv": [
+        "node",
+        "--test",
+        "--test-name-pattern=schemas",
+        "tests/independent-validator-contracts.test.js"
+      ],
+      "workingDirectory": ".",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 181,
+      "evidenceIds": [
+        "E-SCHEMA-PASS"
+      ]
+    },
+    {
+      "id": "CR-SEMANTIC-TEST",
+      "commandId": "CMD-SEMANTIC-TEST",
+      "argv": [
+        "node",
+        "--test",
+        "--test-name-pattern=semantic",
+        "tests/independent-validator-contracts.test.js"
+      ],
+      "workingDirectory": ".",
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": 190,
+      "evidenceIds": [
+        "E-SEMANTIC-FAIL"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-SEMANTIC-SIGNATURE",
+      "severity": "high",
+      "code": "FAILURE_SIGNATURE_RULE_MISSING",
+      "title": "Deterministic failure signatures are not enforced",
+      "description": "A result with a failure signature that did not match its canonical basis was accepted.",
+      "expected": "Semantic validation rejects every failure signature whose digest differs from its canonical basis.",
+      "actual": "The malformed failure signature was accepted.",
+      "criterionIds": [
+        "AC-SEMANTICS"
+      ],
+      "evidenceIds": [
+        "E-SEMANTIC-FAIL",
+        "E-CHECKER-SOURCE"
+      ],
+      "failureSignatureId": "SIG-SEMANTIC-SIGNATURE",
+      "location": {
+        "path": "src/independent-validator-contracts.js",
+        "line": 211
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E-REVISION",
+      "kind": "revisionProof",
+      "summary": "The inspected revision matched the assignment before and after validation, and the candidate remained clean.",
+      "digest": "sha256:ee585bb827561caa7c6cdf7686ea238518ec04e8ef1396b996227a86a484acc1",
+      "excerpt": "assigned=1111111111111111111111111111111111111111 inspected=1111111111111111111111111111111111111111 post_check=1111111111111111111111111111111111111111 clean_before=true clean_after=true"
+    },
+    {
+      "id": "E-SCHEMA-PASS",
+      "kind": "commandOutput",
+      "summary": "The focused schema-validation tests passed.",
+      "digest": "sha256:6055a946863abd286268e49125d74052f6b4ec4b42d0d0fb8d3c35e402b7d5d8",
+      "excerpt": "TAP version 13\n# tests 4\n# pass 4\n# fail 0",
+      "commandId": "CMD-SCHEMA-TEST"
+    },
+    {
+      "id": "E-SEMANTIC-FAIL",
+      "kind": "commandOutput",
+      "summary": "The semantic-validation tests exposed the missing rule.",
+      "digest": "sha256:99672a331f6c832e37c05c89e61a0ee27aabc9088402fe26db941008bf2f63f7",
+      "excerpt": "not ok 8 - rejects a failure signature that does not match its canonical basis\nexpected: invalid\nactual: valid",
+      "commandId": "CMD-SEMANTIC-TEST"
+    },
+    {
+      "id": "E-CHECKER-SOURCE",
+      "kind": "artifactContent",
+      "summary": "Read-only source inspection localized the missing comparison.",
+      "digest": "sha256:e49d7ab88ef51515cf72702d20ade1ab417be85fcdb1d47774662068afeaf15d",
+      "excerpt": "failure signature value was not compared with its canonical basis digest",
+      "artifactPath": "src/independent-validator-contracts.js"
+    }
+  ],
+  "errors": [],
+  "failureSignatures": [
+    {
+      "id": "SIG-SEMANTIC-SIGNATURE",
+      "value": "sha256:515c0b25b1eab4e622e4d8c4d9f66a19382ab5dfde56da0a54a66575b6bbfe29",
+      "basis": {
+        "namespace": "independent-validator/v1",
+        "sourceType": "finding",
+        "sourceId": "F-SEMANTIC-SIGNATURE",
+        "code": "FAILURE_SIGNATURE_RULE_MISSING",
+        "context": {
+          "criterionIds": [
+            "AC-SEMANTICS"
+          ],
+          "commandIds": [
+            "CMD-SEMANTIC-TEST"
+          ],
+          "artifactPaths": [
+            "src/independent-validator-contracts.js"
+          ]
+        }
+      }
+    }
+  ],
+  "validatorMetadata": {
+    "validatorId": "validator-example-07",
+    "tool": "codex/independent-validator-v1",
+    "implementedCandidate": false,
+    "independenceAttested": true
+  }
+}

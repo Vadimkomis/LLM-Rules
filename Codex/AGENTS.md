@@ -229,6 +229,7 @@ Use reusable Codex skills (stored under `skills/`) for targeted work and portabi
 | `senior-code-reviewer` | **After** completing a feature or logical chunk of code — reviews for bugs, security, performance, and maintainability |
 | `red-team-analyst` | For adversarial security review of auth, permissions, payments, uploads, APIs, and other high-risk attack surfaces |
 | `senior-qa-engineer` | When you need test coverage analysis, test case design, TDD workflows, or flaky test debugging |
+| `validate-feature-candidate` | **After** a feature candidate is frozen at an immutable revision — independently runs approved checks without modifying the candidate and returns an evidence-backed pass, fail, or error result |
 | `code-simplification-architect` | When code works but is messy — simplifies nested logic, breaks down god classes, eliminates duplication |
 | `github-actions-engineer` | For creating, debugging, or optimizing GitHub Actions workflows and CI/CD pipelines |
 | `devops-engineer` | When designing infrastructure and delivery beyond GitHub Actions — IaC, cloud provisioning, containers/Kubernetes, environments, and observability |
@@ -244,3 +245,4 @@ Use reusable Codex skills (stored under `skills/`) for targeted work and portabi
 5. **Localize** — apply `skills/app-localization` when adding or auditing translated app copy
 6. **Test** — apply `skills/senior-qa-engineer` to ensure coverage
 7. **Simplify** — apply `skills/code-simplification-architect` if the result is complex
+8. **Validate** — freeze the candidate at an immutable revision, then apply `skills/validate-feature-candidate` for evidence-backed validation

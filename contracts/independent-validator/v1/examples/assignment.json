@@ -1,0 +1,94 @@
+{
+  "contractVersion": "1.0.0",
+  "assignmentId": "IVA-EXAMPLE-001",
+  "candidateRevision": {
+    "vcs": "git",
+    "algorithm": "sha1",
+    "commit": "1111111111111111111111111111111111111111"
+  },
+  "repositoryContext": {
+    "repositoryRoot": ".",
+    "contextNotes": [
+      "Validation is performed from the supplied repository root.",
+      "The approved commands do not require network access."
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "AC-SCHEMAS",
+      "description": "The published v1 assignment and result schemas accept conforming documents and reject malformed documents.",
+      "evidenceRequirements": {
+        "commandOutput": "Output from the focused schema-validation tests."
+      }
+    },
+    {
+      "id": "AC-SEMANTICS",
+      "description": "Semantic validation enforces outcome, revision, evidence, independence, and deterministic failure-signature rules.",
+      "evidenceRequirements": {
+        "commandOutput": "Output from the focused semantic-validation tests."
+      }
+    }
+  ],
+  "approvedValidationCommands": [
+    {
+      "id": "CMD-SCHEMA-TEST",
+      "argv": [
+        "node",
+        "--test",
+        "--test-name-pattern=schemas",
+        "tests/independent-validator-contracts.test.js"
+      ],
+      "workingDirectory": ".",
+      "timeoutMs": 120000,
+      "expectedExitCodes": [
+        0
+      ],
+      "criterionIds": [
+        "AC-SCHEMAS"
+      ]
+    },
+    {
+      "id": "CMD-SEMANTIC-TEST",
+      "argv": [
+        "node",
+        "--test",
+        "--test-name-pattern=semantic",
+        "tests/independent-validator-contracts.test.js"
+      ],
+      "workingDirectory": ".",
+      "timeoutMs": 120000,
+      "expectedExitCodes": [
+        0
+      ],
+      "criterionIds": [
+        "AC-SEMANTICS"
+      ]
+    }
+  ],
+  "constraints": {
+    "candidateMustRemainUnmodified": true,
+    "validatorMustNotHaveImplementedCandidate": true,
+    "additionalConstraints": [
+      "Do not install dependencies during validation.",
+      "Do not update generated files or snapshots."
+    ]
+  },
+  "relevantArtifactPaths": [
+    {
+      "path": "contracts/independent-validator/v1/assignment.schema.json",
+      "purpose": "Assignment schema under validation."
+    },
+    {
+      "path": "contracts/independent-validator/v1/result.schema.json",
+      "purpose": "Result schema under validation."
+    },
+    {
+      "path": "src/independent-validator-contracts.js",
+      "purpose": "Cross-document semantic validation."
+    },
+    {
+      "path": "tests/independent-validator-contracts.test.js",
+      "purpose": "Automated contract tests."
+    }
+  ]
+}
