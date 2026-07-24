@@ -250,7 +250,7 @@ async function installInit(args, io) {
     await copyFileSafe(path.join(root, "Codex", "AGENTS.md"), path.join(target, "AGENTS.md"), args, result);
     await copyDirectorySafe(
       path.join(root, "Codex", "skills"),
-      path.join(target, "skills"),
+      path.join(target, "Codex", "skills"),
       args,
       result
     );
@@ -259,12 +259,6 @@ async function installInit(args, io) {
     await copyFileSafe(
       path.join(root, "Claude", "CLAUDE.md"),
       path.join(target, "CLAUDE.md"),
-      args,
-      result
-    );
-    await copyDirectorySafe(
-      path.join(root, "Claude", "agents"),
-      path.join(target, ".claude", "agents"),
       args,
       result
     );
@@ -366,8 +360,14 @@ async function runDoctor(args, io) {
   const codexChecks = [
     { name: "AGENTS.md", path: path.join(target, "AGENTS.md") },
     {
-      name: "skills/validate-feature-candidate/SKILL.md",
-      path: path.join(target, "skills", "validate-feature-candidate", "SKILL.md"),
+      name: "Codex/skills/validate-feature-candidate/SKILL.md",
+      path: path.join(
+        target,
+        "Codex",
+        "skills",
+        "validate-feature-candidate",
+        "SKILL.md"
+      ),
       sourcePath: path.join(
         root,
         "Codex",
@@ -378,12 +378,7 @@ async function runDoctor(args, io) {
     }
   ];
   const claudeChecks = [
-    { name: "CLAUDE.md", path: path.join(target, "CLAUDE.md") },
-    {
-      name: ".claude/agents/independent-validator.md",
-      path: path.join(target, ".claude", "agents", "independent-validator.md"),
-      sourcePath: path.join(root, "Claude", "agents", "independent-validator.md")
-    }
+    { name: "CLAUDE.md", path: path.join(target, "CLAUDE.md") }
   ];
   const agentChecks = {
     codex: codexChecks,

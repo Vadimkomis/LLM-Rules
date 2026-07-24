@@ -8,50 +8,34 @@
   },
   "repositoryContext": {
     "repositoryRoot": ".",
-    "validationWorkspace": "/tmp/ai-playbook-validator-example",
-    "vcs": "git",
-    "candidateImplementerIds": [
-      "agent-implementer-42"
-    ],
     "contextNotes": [
-      "The orchestrator supplied a disposable checkout at the assigned commit.",
-      "No network access is needed for the approved checks."
+      "Validation is performed from the supplied repository root.",
+      "The approved commands do not require network access."
     ]
   },
   "acceptanceCriteria": [
     {
-      "id": "AC-001",
-      "description": "The shared v1 assignment and result contracts validate all published examples.",
-      "required": true,
-      "evidenceRequirements": [
-        {
-          "id": "ER-AC-001-COMMAND",
-          "kind": "commandOutput",
-          "description": "Output from the focused contract test suite.",
-          "minimumCount": 1
-        }
-      ]
+      "id": "AC-SCHEMAS",
+      "description": "The published v1 assignment and result schemas accept conforming documents and reject malformed documents.",
+      "evidenceRequirements": {
+        "commandOutput": "Output from the focused schema-validation tests."
+      }
     },
     {
-      "id": "AC-002",
-      "description": "CLI initialization installs the selected validator workflow, contracts, and semantic checker, and doctor integrity-verifies the managed validator files.",
-      "required": true,
-      "evidenceRequirements": [
-        {
-          "id": "ER-AC-002-COMMAND",
-          "kind": "commandOutput",
-          "description": "Output from the CLI test suite.",
-          "minimumCount": 1
-        }
-      ]
+      "id": "AC-SEMANTICS",
+      "description": "Semantic validation enforces outcome, revision, evidence, independence, and deterministic failure-signature rules.",
+      "evidenceRequirements": {
+        "commandOutput": "Output from the focused semantic-validation tests."
+      }
     }
   ],
   "approvedValidationCommands": [
     {
-      "id": "CMD-CONTRACT-TEST",
+      "id": "CMD-SCHEMA-TEST",
       "argv": [
         "node",
         "--test",
+        "--test-name-pattern=schemas",
         "tests/independent-validator-contracts.test.js"
       ],
       "workingDirectory": ".",
@@ -59,62 +43,52 @@
       "expectedExitCodes": [
         0
       ],
-      "required": true,
       "criterionIds": [
-        "AC-001"
+        "AC-SCHEMAS"
       ]
     },
     {
-      "id": "CMD-CLI-TEST",
+      "id": "CMD-SEMANTIC-TEST",
       "argv": [
         "node",
         "--test",
-        "tests/cli.test.js"
+        "--test-name-pattern=semantic",
+        "tests/independent-validator-contracts.test.js"
       ],
       "workingDirectory": ".",
       "timeoutMs": 120000,
       "expectedExitCodes": [
         0
       ],
-      "required": true,
       "criterionIds": [
-        "AC-002"
+        "AC-SEMANTICS"
       ]
     }
   ],
   "constraints": {
     "candidateMustRemainUnmodified": true,
     "validatorMustNotHaveImplementedCandidate": true,
-    "networkPolicy": "forbidden",
     "additionalConstraints": [
       "Do not install dependencies during validation.",
-      "Do not update snapshots or generated fixtures."
+      "Do not update generated files or snapshots."
     ]
   },
   "relevantArtifactPaths": [
     {
-      "id": "ART-ASSIGNMENT-SCHEMA",
       "path": "contracts/independent-validator/v1/assignment.schema.json",
-      "purpose": "Assignment contract under validation.",
-      "required": false
+      "purpose": "Assignment schema under validation."
     },
     {
-      "id": "ART-RESULT-SCHEMA",
       "path": "contracts/independent-validator/v1/result.schema.json",
-      "purpose": "Result contract under validation.",
-      "required": false
+      "purpose": "Result schema under validation."
     },
     {
-      "id": "ART-CLI",
-      "path": "src/cli.js",
-      "purpose": "CLI installation and doctor behavior.",
-      "required": true
+      "path": "src/independent-validator-contracts.js",
+      "purpose": "Cross-document semantic validation."
     },
     {
-      "id": "ART-CONTRACT-TESTS",
       "path": "tests/independent-validator-contracts.test.js",
-      "purpose": "Automated schema and semantic validation.",
-      "required": false
+      "purpose": "Automated contract tests."
     }
   ]
 }

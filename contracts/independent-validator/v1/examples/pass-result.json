@@ -1,114 +1,86 @@
 {
   "contractVersion": "1.0.0",
   "assignmentId": "IVA-EXAMPLE-001",
-  "assignmentDigest": "sha256:c7b6dad47b4c8e484dc951fc98a7a45b0009f1d29d8750f5b016d96371409760",
-  "outcome": "pass",
-  "summary": "Both required criteria passed against the assigned immutable revision.",
+  "assignmentDigest": "sha256:044a483fec708b7bfc1215a8a67b62ff79dc09aa3e7ce0b47e45b2ed77f696ab",
   "inspectedRevision": {
     "vcs": "git",
     "algorithm": "sha1",
     "commit": "1111111111111111111111111111111111111111"
   },
+  "outcome": "pass",
+  "summary": "Both acceptance criteria passed against the assigned immutable revision.",
   "revisionVerification": {
-    "assignedRevision": {
+    "status": "verified",
+    "postCheckRevision": {
       "vcs": "git",
       "algorithm": "sha1",
       "commit": "1111111111111111111111111111111111111111"
     },
-    "resolvedRevision": {
-      "vcs": "git",
-      "algorithm": "sha1",
-      "commit": "1111111111111111111111111111111111111111"
-    },
-    "inspectedRevision": {
-      "vcs": "git",
-      "algorithm": "sha1",
-      "commit": "1111111111111111111111111111111111111111"
-    },
-    "preflightRevision": {
-      "vcs": "git",
-      "algorithm": "sha1",
-      "commit": "1111111111111111111111111111111111111111"
-    },
-    "postflightRevision": {
-      "vcs": "git",
-      "algorithm": "sha1",
-      "commit": "1111111111111111111111111111111111111111"
-    },
-    "preflightTree": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "postflightTree": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "preflightStatusDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "postflightStatusDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "method": "disposable-worktree",
-    "matchesAssignment": true,
-    "verifiedBeforeChecks": true,
-    "cleanBefore": true,
-    "workspaceUnchangedAfter": true,
-    "sourceWorkspaceUnmodified": true,
+    "cleanBeforeChecks": true,
+    "cleanAfterChecks": true,
     "evidenceIds": [
       "E-REVISION"
     ]
   },
   "executedChecks": [
     {
-      "id": "CHK-AC-001",
-      "criterionId": "AC-001",
-      "status": "passed",
-      "summary": "The focused contract tests compiled both schemas and accepted every example.",
+      "id": "CHK-SCHEMAS",
+      "criterionId": "AC-SCHEMAS",
+      "status": "pass",
+      "summary": "The focused schema-validation tests passed.",
       "commandResultIds": [
-        "CR-CONTRACT-TEST"
+        "CR-SCHEMA-TEST"
       ],
       "evidenceIds": [
-        "E-CONTRACT-TEST"
+        "E-SCHEMA-PASS"
       ]
     },
     {
-      "id": "CHK-AC-002",
-      "criterionId": "AC-002",
-      "status": "passed",
-      "summary": "The CLI tests proved init installation and doctor verification.",
+      "id": "CHK-SEMANTICS",
+      "criterionId": "AC-SEMANTICS",
+      "status": "pass",
+      "summary": "The focused semantic-validation tests passed.",
       "commandResultIds": [
-        "CR-CLI-TEST"
+        "CR-SEMANTIC-TEST"
       ],
       "evidenceIds": [
-        "E-CLI-TEST",
-        "E-CLI-SOURCE-PASS"
+        "E-SEMANTIC-PASS"
       ]
     }
   ],
   "commandResults": [
     {
-      "id": "CR-CONTRACT-TEST",
-      "commandId": "CMD-CONTRACT-TEST",
+      "id": "CR-SCHEMA-TEST",
+      "commandId": "CMD-SCHEMA-TEST",
       "argv": [
         "node",
         "--test",
+        "--test-name-pattern=schemas",
         "tests/independent-validator-contracts.test.js"
       ],
       "workingDirectory": ".",
-      "status": "passed",
+      "status": "pass",
       "exitCode": 0,
-      "signal": null,
       "durationMs": 184,
       "evidenceIds": [
-        "E-CONTRACT-TEST"
+        "E-SCHEMA-PASS"
       ]
     },
     {
-      "id": "CR-CLI-TEST",
-      "commandId": "CMD-CLI-TEST",
+      "id": "CR-SEMANTIC-TEST",
+      "commandId": "CMD-SEMANTIC-TEST",
       "argv": [
         "node",
         "--test",
-        "tests/cli.test.js"
+        "--test-name-pattern=semantic",
+        "tests/independent-validator-contracts.test.js"
       ],
       "workingDirectory": ".",
-      "status": "passed",
+      "status": "pass",
       "exitCode": 0,
-      "signal": null,
-      "durationMs": 93,
+      "durationMs": 192,
       "evidenceIds": [
-        "E-CLI-TEST"
+        "E-SEMANTIC-PASS"
       ]
     }
   ],
@@ -117,62 +89,33 @@
     {
       "id": "E-REVISION",
       "kind": "revisionProof",
-      "summary": "The assigned commit, tree, tracked files, and non-ignored untracked files remained unchanged.",
-      "source": {
-        "type": "vcs",
-        "reference": "git revision and integrity protocol"
-      },
-      "digest": "sha256:16ed8a62bcf8d121b471a6cca81b19831803945d6656c4f8840bc06eebcd1d27",
-      "excerpt": "assigned=1111111111111111111111111111111111111111 resolved=1111111111111111111111111111111111111111 head_before=1111111111111111111111111111111111111111 head_after=1111111111111111111111111111111111111111 tree_before=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa tree_after=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa status_scope=tracked_and_nonignored status_before=sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 status_after=sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 clean_before=true unchanged_after=true",
-      "capturedAt": "2026-07-24T14:00:01Z"
+      "summary": "The inspected revision matched the assignment before and after validation, and the candidate remained clean.",
+      "digest": "sha256:ee585bb827561caa7c6cdf7686ea238518ec04e8ef1396b996227a86a484acc1",
+      "excerpt": "assigned=1111111111111111111111111111111111111111 inspected=1111111111111111111111111111111111111111 post_check=1111111111111111111111111111111111111111 clean_before=true clean_after=true"
     },
     {
-      "id": "E-CONTRACT-TEST",
+      "id": "E-SCHEMA-PASS",
       "kind": "commandOutput",
-      "summary": "The focused contract test suite passed.",
-      "source": {
-        "type": "command",
-        "reference": "CMD-CONTRACT-TEST"
-      },
-      "digest": "sha256:5148964649f88513aa3e68438d2540529540c0f86ea2d4e9cee2d6a513b4ec29",
-      "excerpt": "TAP version 13\n# pass 8\n# fail 0",
-      "capturedAt": "2026-07-24T14:00:03Z"
+      "summary": "The focused schema-validation tests passed.",
+      "digest": "sha256:6055a946863abd286268e49125d74052f6b4ec4b42d0d0fb8d3c35e402b7d5d8",
+      "excerpt": "TAP version 13\n# tests 4\n# pass 4\n# fail 0",
+      "commandId": "CMD-SCHEMA-TEST"
     },
     {
-      "id": "E-CLI-TEST",
+      "id": "E-SEMANTIC-PASS",
       "kind": "commandOutput",
-      "summary": "The CLI test suite passed.",
-      "source": {
-        "type": "command",
-        "reference": "CMD-CLI-TEST"
-      },
-      "digest": "sha256:2d9e08928fcec3867e6368503ee0ee3cce18a5bed78322c88eeefbfe5ce9d6ed",
-      "excerpt": "TAP version 13\n# pass 3\n# fail 0",
-      "capturedAt": "2026-07-24T14:00:04Z"
-    },
-    {
-      "id": "E-CLI-SOURCE-PASS",
-      "kind": "artifactContent",
-      "summary": "Read-only source inspection confirmed contract installation and doctor checks.",
-      "source": {
-        "type": "artifact",
-        "reference": "ART-CLI"
-      },
-      "digest": "sha256:15d932fb4f978e01c8a725afebf9d89429637d2f6e1f060f502c1dd40efd8470",
-      "excerpt": "CLI source contains contract copy and doctor schema checks",
-      "artifactPath": "src/cli.js",
-      "capturedAt": "2026-07-24T14:00:04Z"
+      "summary": "The focused semantic-validation tests passed.",
+      "digest": "sha256:992956bdedeef16d2e11b05846360cada5ae5c19962653f2bb12c2d448db8728",
+      "excerpt": "TAP version 13\n# tests 10\n# pass 10\n# fail 0",
+      "commandId": "CMD-SEMANTIC-TEST"
     }
   ],
   "errors": [],
   "failureSignatures": [],
   "validatorMetadata": {
-    "validatorId": "agent-validator-07",
-    "validatorKind": "agent",
-    "validatorVersion": "codex-independent-validator/1.0.0",
+    "validatorId": "validator-example-07",
+    "tool": "codex/independent-validator-v1",
     "implementedCandidate": false,
     "independenceAttested": true
-  },
-  "startedAt": "2026-07-24T14:00:00Z",
-  "completedAt": "2026-07-24T14:00:05Z"
+  }
 }

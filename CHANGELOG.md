@@ -15,10 +15,10 @@ This project follows Semantic Versioning. The structure below is inspired by Kee
 
 ### Changed
 - Added independent validation as the final documented workflow gate.
-- Updated `ai-playbook init` to install the shared contracts plus the selected
-  Claude role and/or project-local Codex skill, including the pair-level semantic
-  checker. Updated `doctor` to integrity-check the schemas, checker, and selected
-  role or skill, and to reject altered managed files.
+- Updated `ai-playbook init` to install the shared contracts and pair-level
+  checker without changing its established Codex or Claude destinations.
+  Updated `doctor` to integrity-check the schemas, checker, and installed Codex
+  validator skill and to reject altered managed files.
 - Excluded machine-local Claude permission overrides from published packages.
 
 ## [1.0.4] - 2026-03-31

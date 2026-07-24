@@ -1,74 +1,35 @@
 {
   "contractVersion": "1.0.0",
   "assignmentId": "IVA-EXAMPLE-001",
-  "assignmentDigest": "sha256:c7b6dad47b4c8e484dc951fc98a7a45b0009f1d29d8750f5b016d96371409760",
-  "outcome": "error",
-  "summary": "Validation could not conclude because the second approved command could not start.",
+  "assignmentDigest": "sha256:044a483fec708b7bfc1215a8a67b62ff79dc09aa3e7ce0b47e45b2ed77f696ab",
   "inspectedRevision": {
     "vcs": "git",
     "algorithm": "sha1",
     "commit": "1111111111111111111111111111111111111111"
   },
+  "outcome": "error",
+  "summary": "Validation could not conclude because an approved command could not start.",
   "revisionVerification": {
-    "assignedRevision": {
+    "status": "verified",
+    "postCheckRevision": {
       "vcs": "git",
       "algorithm": "sha1",
       "commit": "1111111111111111111111111111111111111111"
     },
-    "resolvedRevision": {
-      "vcs": "git",
-      "algorithm": "sha1",
-      "commit": "1111111111111111111111111111111111111111"
-    },
-    "inspectedRevision": {
-      "vcs": "git",
-      "algorithm": "sha1",
-      "commit": "1111111111111111111111111111111111111111"
-    },
-    "preflightRevision": {
-      "vcs": "git",
-      "algorithm": "sha1",
-      "commit": "1111111111111111111111111111111111111111"
-    },
-    "postflightRevision": {
-      "vcs": "git",
-      "algorithm": "sha1",
-      "commit": "1111111111111111111111111111111111111111"
-    },
-    "preflightTree": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "postflightTree": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "preflightStatusDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "postflightStatusDigest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "method": "disposable-worktree",
-    "matchesAssignment": true,
-    "verifiedBeforeChecks": true,
-    "cleanBefore": true,
-    "workspaceUnchangedAfter": true,
-    "sourceWorkspaceUnmodified": true,
+    "cleanBeforeChecks": true,
+    "cleanAfterChecks": true,
     "evidenceIds": [
       "E-REVISION"
     ]
   },
   "executedChecks": [
     {
-      "id": "CHK-AC-001",
-      "criterionId": "AC-001",
-      "status": "passed",
-      "summary": "The focused contract tests passed before the infrastructure failure.",
-      "commandResultIds": [
-        "CR-CONTRACT-TEST"
-      ],
-      "evidenceIds": [
-        "E-CONTRACT-TEST"
-      ]
-    },
-    {
-      "id": "CHK-AC-002",
-      "criterionId": "AC-002",
+      "id": "CHK-SCHEMAS",
+      "criterionId": "AC-SCHEMAS",
       "status": "error",
-      "summary": "The CLI check produced no candidate verdict because its executable could not start.",
+      "summary": "The schema-validation check produced no candidate verdict because its executable was unavailable.",
       "commandResultIds": [
-        "CR-CLI-TEST"
+        "CR-SCHEMA-TEST"
       ],
       "evidenceIds": [
         "E-SPAWN-ERROR"
@@ -77,36 +38,18 @@
   ],
   "commandResults": [
     {
-      "id": "CR-CONTRACT-TEST",
-      "commandId": "CMD-CONTRACT-TEST",
+      "id": "CR-SCHEMA-TEST",
+      "commandId": "CMD-SCHEMA-TEST",
       "argv": [
         "node",
         "--test",
+        "--test-name-pattern=schemas",
         "tests/independent-validator-contracts.test.js"
-      ],
-      "workingDirectory": ".",
-      "status": "passed",
-      "exitCode": 0,
-      "signal": null,
-      "durationMs": 183,
-      "evidenceIds": [
-        "E-CONTRACT-TEST"
-      ]
-    },
-    {
-      "id": "CR-CLI-TEST",
-      "commandId": "CMD-CLI-TEST",
-      "argv": [
-        "node",
-        "--test",
-        "tests/cli.test.js"
       ],
       "workingDirectory": ".",
       "status": "error",
       "exitCode": null,
-      "signal": null,
       "durationMs": 2,
-      "errorCode": "EXECUTABLE_NOT_FOUND",
       "evidenceIds": [
         "E-SPAWN-ERROR"
       ]
@@ -117,71 +60,47 @@
     {
       "id": "E-REVISION",
       "kind": "revisionProof",
-      "summary": "The assigned commit, tree, tracked files, and non-ignored untracked files remained unchanged.",
-      "source": {
-        "type": "vcs",
-        "reference": "git revision and integrity protocol"
-      },
-      "digest": "sha256:16ed8a62bcf8d121b471a6cca81b19831803945d6656c4f8840bc06eebcd1d27",
-      "excerpt": "assigned=1111111111111111111111111111111111111111 resolved=1111111111111111111111111111111111111111 head_before=1111111111111111111111111111111111111111 head_after=1111111111111111111111111111111111111111 tree_before=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa tree_after=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa status_scope=tracked_and_nonignored status_before=sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 status_after=sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 clean_before=true unchanged_after=true",
-      "capturedAt": "2026-07-24T14:20:01Z"
-    },
-    {
-      "id": "E-CONTRACT-TEST",
-      "kind": "commandOutput",
-      "summary": "The focused contract test suite passed.",
-      "source": {
-        "type": "command",
-        "reference": "CMD-CONTRACT-TEST"
-      },
-      "digest": "sha256:5148964649f88513aa3e68438d2540529540c0f86ea2d4e9cee2d6a513b4ec29",
-      "excerpt": "TAP version 13\n# pass 8\n# fail 0",
-      "capturedAt": "2026-07-24T14:20:03Z"
+      "summary": "The inspected revision matched the assignment before and after validation, and the candidate remained clean.",
+      "digest": "sha256:ee585bb827561caa7c6cdf7686ea238518ec04e8ef1396b996227a86a484acc1",
+      "excerpt": "assigned=1111111111111111111111111111111111111111 inspected=1111111111111111111111111111111111111111 post_check=1111111111111111111111111111111111111111 clean_before=true clean_after=true"
     },
     {
       "id": "E-SPAWN-ERROR",
       "kind": "commandOutput",
-      "summary": "The process runner reported that the approved executable was unavailable.",
-      "source": {
-        "type": "command",
-        "reference": "CMD-CLI-TEST"
-      },
+      "summary": "The operating system reported that the approved executable was unavailable.",
       "digest": "sha256:835141e628c36b36c9232a1355bd97fd062d4cfc1e22c6b04823ded41ab9ee0b",
       "excerpt": "spawn node ENOENT",
-      "capturedAt": "2026-07-24T14:20:04Z"
+      "commandId": "CMD-SCHEMA-TEST"
     }
   ],
   "errors": [
     {
-      "id": "ERR-CMD-CLI-TEST-SPAWN",
-      "code": "EXECUTABLE_NOT_FOUND",
+      "id": "ERR-SCHEMA-TEST-SPAWN",
       "stage": "execution",
-      "message": "The process runner could not locate the executable for CMD-CLI-TEST, so AC-002 was not evaluated.",
-      "commandResultId": "CR-CLI-TEST",
+      "code": "EXECUTABLE_NOT_FOUND",
+      "message": "The approved schema-validation command could not start because its executable was unavailable.",
       "evidenceIds": [
         "E-SPAWN-ERROR"
       ],
-      "failureSignatureIds": [
-        "SIG-CMD-CLI-TEST-SPAWN"
-      ]
+      "failureSignatureId": "SIG-SCHEMA-TEST-SPAWN",
+      "commandResultId": "CR-SCHEMA-TEST"
     }
   ],
   "failureSignatures": [
     {
-      "id": "SIG-CMD-CLI-TEST-SPAWN",
-      "value": "sha256:04629c39e1e4dd662720c9576c90c246db6f5ca74116c31185711bcdda7c71d9",
+      "id": "SIG-SCHEMA-TEST-SPAWN",
+      "value": "sha256:b0213b6694b573bdb1f2ce64ae963731fae4c94ceccff338a99eb04a76dfc820",
       "basis": {
         "namespace": "independent-validator/v1",
-        "category": "infrastructure",
         "sourceType": "error",
-        "sourceId": "ERR-CMD-CLI-TEST-SPAWN",
+        "sourceId": "ERR-SCHEMA-TEST-SPAWN",
         "code": "EXECUTABLE_NOT_FOUND",
         "context": {
           "criterionIds": [
-            "AC-002"
+            "AC-SCHEMAS"
           ],
           "commandIds": [
-            "CMD-CLI-TEST"
+            "CMD-SCHEMA-TEST"
           ],
           "artifactPaths": []
         }
@@ -189,12 +108,9 @@
     }
   ],
   "validatorMetadata": {
-    "validatorId": "agent-validator-07",
-    "validatorKind": "agent",
-    "validatorVersion": "codex-independent-validator/1.0.0",
+    "validatorId": "validator-example-07",
+    "tool": "codex/independent-validator-v1",
     "implementedCandidate": false,
     "independenceAttested": true
-  },
-  "startedAt": "2026-07-24T14:20:00Z",
-  "completedAt": "2026-07-24T14:20:05Z"
+  }
 }

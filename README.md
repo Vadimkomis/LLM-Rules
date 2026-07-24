@@ -61,9 +61,9 @@ Install into any repository with `npx`:
 npx @vadim/ai-playbook init --agent codex
 ```
 
-Use `--agent codex` to install `AGENTS.md` and project-local `skills`, `--agent claude`
-to install `CLAUDE.md` and `.claude/agents`, or `--agent both` to install both
-distributions. Every mode also installs the shared validator contracts under
+Use `--agent codex` to install `AGENTS.md` and the existing project-local
+`Codex/skills` tree, `--agent claude` to install `CLAUDE.md`, or `--agent both`
+to install both distributions. Every mode also installs the shared validator contracts under
 `.ai-playbook/contracts/independent-validator/v1` and their pair-level semantic
 checker at `.ai-playbook/contracts/independent-validator/validate.cjs`.
 
@@ -110,8 +110,8 @@ npx @vadim/ai-playbook init --profile backend-rust --agent codex
 
 ### Claude Code
 
-For a project-local installation, the CLI copies `CLAUDE.md`, the complete Claude
-agent collection under `.claude/agents`, and the shared validation contracts:
+For a project-local installation, the CLI copies `CLAUDE.md` and the shared
+validation contracts:
 
 ```bash
 # from the target repository root
@@ -119,8 +119,9 @@ npx @vadim/ai-playbook init --agent claude
 npx @vadim/ai-playbook doctor --agent claude
 ```
 
-The CLI does not alter your home-level Claude settings. To share the rules,
-settings, and agents globally, symlink them manually:
+The CLI preserves its existing behavior and does not copy the Claude agent
+collection or alter home-level settings. To share the rules, settings, and agents
+globally, symlink them manually:
 
 ```bash
 # Link shared CLAUDE.md (applies to all projects)
@@ -160,13 +161,13 @@ ln -sf /path/to/ai-playbook/Codex/AGENTS.md /path/to/your-project/AGENTS.md
 
 ```bash
 # Example: bring in a few common skills
-mkdir -p /path/to/your-project/skills
+mkdir -p /path/to/your-project/Codex/skills
 rsync -a /path/to/ai-playbook/Codex/skills/architecture-reviewer \
           /path/to/ai-playbook/Codex/skills/red-team-analyst \
           /path/to/ai-playbook/Codex/skills/senior-code-reviewer \
           /path/to/ai-playbook/Codex/skills/senior-qa-engineer \
           /path/to/ai-playbook/Codex/skills/validate-feature-candidate \
-          /path/to/your-project/skills/
+          /path/to/your-project/Codex/skills/
 
 # Install the shared validation contracts expected by the validator
 mkdir -p /path/to/your-project/.ai-playbook/contracts/independent-validator
@@ -195,9 +196,9 @@ Follow the same usage pattern as in Claude:
 5. Localize — apply `skills/app-localization` when adding or auditing translated app copy
 6. Test — apply `skills/senior-qa-engineer` to ensure coverage
 7. Simplify — apply `skills/code-simplification-architect` if the result is complex
-8. Validate — freeze the candidate at an immutable revision, then apply `skills/validate-feature-candidate` for evidence-backed validation
+8. Validate — freeze the candidate at an immutable revision, then apply `Codex/skills/validate-feature-candidate` for evidence-backed validation
 
-In Codex CLI, reference the skill by path or name when creating a Task, e.g., "Use skills/architecture-reviewer on module X; focus on boundaries and failure modes."
+In Codex CLI, reference the skill by path or name when creating a Task, e.g., "Use Codex/skills/architecture-reviewer on module X; focus on boundaries and failure modes."
 
 ## Shared Independent-Validation Contracts
 
@@ -217,7 +218,7 @@ ls -la ~/.claude
 cat ~/.claude/CLAUDE.md | head
 
 # If you vendored Codex skills into a project, re-sync updated skills
-rsync -a /path/to/ai-playbook/Codex/skills/ /path/to/your-project/skills/
+rsync -a /path/to/ai-playbook/Codex/skills/ /path/to/your-project/Codex/skills/
 ```
 
 If a symlink is broken, it usually means you moved the repo. Put it somewhere stable and relink.

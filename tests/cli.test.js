@@ -51,7 +51,7 @@ test("detectProfilesFromProject detects stack signals", () => {
   );
 });
 
-test("init --agent both installs and doctor verifies the validator distributions", async (t) => {
+test("init --agent both adds validator contracts without changing agent destinations", async (t) => {
   const target = await fs.mkdtemp(path.join(os.tmpdir(), "ai-playbook-validator-"));
   t.after(() => fs.rm(target, { recursive: true, force: true }));
   await fs.writeFile(
@@ -73,8 +73,7 @@ test("init --agent both installs and doctor verifies the validator distributions
   const installedFiles = [
     "AGENTS.md",
     "CLAUDE.md",
-    path.join("skills", "validate-feature-candidate", "SKILL.md"),
-    path.join(".claude", "agents", "independent-validator.md"),
+    path.join("Codex", "skills", "validate-feature-candidate", "SKILL.md"),
     path.join(
       ".ai-playbook",
       "contracts",
@@ -99,6 +98,15 @@ test("init --agent both installs and doctor verifies the validator distributions
   for (const installedFile of installedFiles) {
     await fs.access(path.join(target, installedFile));
   }
+  for (const unexpectedFile of [
+    path.join("skills", "validate-feature-candidate", "SKILL.md"),
+    path.join(".claude", "agents", "independent-validator.md")
+  ]) {
+    await assert.rejects(
+      fs.access(path.join(target, unexpectedFile)),
+      (error) => error.code === "ENOENT"
+    );
+  }
   const installedChecker = require(
     path.join(
       target,
@@ -116,8 +124,11 @@ test("init --agent both installs and doctor verifies the validator distributions
   const doctorOutput = doctorCapture.output.stdout;
   assert.match(doctorOutput, /OK\s+AGENTS\.md/);
   assert.match(doctorOutput, /OK\s+CLAUDE\.md/);
-  assert.match(doctorOutput, /OK\s+skills\/validate-feature-candidate\/SKILL\.md/);
-  assert.match(doctorOutput, /OK\s+\.claude\/agents\/independent-validator\.md/);
+  assert.match(
+    doctorOutput,
+    /OK\s+Codex\/skills\/validate-feature-candidate\/SKILL\.md/
+  );
+  assert.doesNotMatch(doctorOutput, /\.claude\/agents/);
   assert.match(doctorOutput, /OK\s+independent-validator\/validate\.cjs/);
   assert.match(doctorOutput, /OK\s+independent-validator\/v1\/assignment/);
   assert.match(doctorOutput, /OK\s+independent-validator\/v1\/result/);
@@ -126,16 +137,16 @@ test("init --agent both installs and doctor verifies the validator distributions
 for (const [agent, workflowPattern, otherWorkflowPath] of [
   [
     "codex",
-    /OK\s+skills\/validate-feature-candidate\/SKILL\.md/,
-    path.join(".claude", "agents", "independent-validator.md")
+    /OK\s+Codex\/skills\/validate-feature-candidate\/SKILL\.md/,
+    "CLAUDE.md"
   ],
   [
     "claude",
-    /OK\s+\.claude\/agents\/independent-validator\.md/,
-    path.join("skills", "validate-feature-candidate", "SKILL.md")
+    /OK\s+CLAUDE\.md/,
+    path.join("Codex", "skills", "validate-feature-candidate", "SKILL.md")
   ]
 ]) {
-  test(`init and doctor support the ${agent} validator distribution independently`, async (t) => {
+  test(`init and doctor preserve the ${agent} layout with validator contracts`, async (t) => {
     const target = await fs.mkdtemp(
       path.join(os.tmpdir(), `ai-playbook-validator-${agent}-`)
     );
@@ -170,6 +181,18 @@ for (const [agent, workflowPattern, otherWorkflowPath] of [
     assert.match(
       doctorCapture.output.stdout,
       /OK\s+independent-validator\/v1\/result/
+    );
+    await assert.rejects(
+      fs.access(
+        path.join(target, ".claude", "agents", "independent-validator.md")
+      ),
+      (error) => error.code === "ENOENT"
+    );
+    await assert.rejects(
+      fs.access(
+        path.join(target, "skills", "validate-feature-candidate", "SKILL.md")
+      ),
+      (error) => error.code === "ENOENT"
     );
   });
 }

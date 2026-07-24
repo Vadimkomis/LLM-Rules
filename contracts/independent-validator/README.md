@@ -1,208 +1,250 @@
-# Independent Validator Contracts
+# Independent Validator Contract
 
-These contracts separate feature implementation from feature acceptance. An
-orchestrator assigns one immutable Git revision to a validator that did not
-implement it, and the validator returns a machine-readable `pass`, `fail`, or
-`error` result without changing the candidate.
+This contract lets an independent validator assess a completed candidate at one
+immutable Git revision without changing it. The assignment supplies the candidate
+context and acceptance requirements; the result reports a `pass`, `fail`, or
+`error` with evidence.
+
+This README is normative for semantics that JSON Schema cannot express. The
+schemas are normative for document shape.
 
 ## Versioning
 
-The current contract is in [`v1/`](v1/). Both documents carry
-`contractVersion: "1.0.0"` and use JSON Schema 2020-12. Additive, compatible
-changes may increment the minor or patch version while remaining in `v1`.
-Breaking field or semantic changes require a new `v2/` directory and new schema
-identifiers.
+[`v1/`](v1/) is permanently `contractVersion: "1.0.0"`. Its schemas and semantics
+must not be changed to mean another version. Every later shape or semantic version
+requires a new version directory, schema identifiers, examples, and validation
+rules. Consumers select a directory explicitly; compatibility is never inferred
+from a shared major version.
 
-The CLI installs the contracts at:
+Source checkouts provide:
+
+```text
+contracts/independent-validator/v1/
+src/independent-validator-contracts.js
+```
+
+Installed copies provide:
 
 ```text
 .ai-playbook/contracts/independent-validator/v1/
+.ai-playbook/contracts/independent-validator/validate.cjs
 ```
 
 ## Assignment
 
-`v1/assignment.schema.json` requires:
+`v1/assignment.schema.json` defines:
 
-- a stable assignment ID;
-- a full 40-character SHA-1 or 64-character SHA-256 Git commit, never a branch,
-  tag, symbolic ref, or abbreviated hash;
-- repository and disposable validation-workspace context, including the
-  candidate implementer IDs;
-- nonempty acceptance criteria with explicit evidence requirements;
-- exact approved commands represented as argument arrays, working directories,
-  timeouts, expected exit codes, and covered criterion IDs;
-- immutable-candidate and independent-validator constraints fixed to `true`;
-- relevant repository-relative artifact paths.
+- `contractVersion` and a stable `assignmentId`;
+- `candidateRevision`, containing a full 40-character SHA-1 or 64-character
+  SHA-256 Git commit rather than a branch, tag, symbolic ref, or abbreviation;
+- `repositoryContext.repositoryRoot`, which may be relative or absolute, and
+  repository context notes;
+- acceptance criteria and an `evidenceRequirements` map from each required
+  evidence kind to its description;
+- approved validation commands, including exact `argv`, working directory,
+  timeout, expected exit codes, and criterion coverage;
+- constraints that require an unchanged candidate and a validator who did not
+  implement it; and
+- relevant artifact paths and their purpose.
 
-An orchestrator must provide the disposable validation workspace. Creating or
-switching worktrees is not validator work because it can mutate repository
-metadata.
+`approvedValidationCommands` and `relevantArtifactPaths` may be empty. Empty
+commands are valid when read-only inspection can satisfy every criterion. Empty
+artifact paths are valid when commands or other permitted read-only observations
+can supply the required evidence. If the assignment does not authorize a
+conclusive validation, the result is `error`.
 
-Every result binds the exact assignment with `assignmentDigest`. First require
-valid JSON whose strings contain only Unicode scalar values, then serialize the
-entire assignment with the RFC 8785 JSON Canonicalization Scheme (JCS). Hash the
-UTF-8 bytes of that canonical JSON with SHA-256 and prefix the lowercase hexadecimal
-digest with `sha256:`. Changing criteria, constraints, commands, timeouts, or any
-other assignment field therefore invalidates an old result even when
-`assignmentId` is reused.
+Resolve a relative `repositoryRoot` from the validator's current directory. Use
+an absolute root as supplied. Validate that the resolved directory is the Git
+repository being assigned, then operate on that repository directly. Do not
+create or select another worktree, clone, checkout, or repository copy.
 
-## Read-only validation protocol
+## Validator behavior
 
-The validator must:
+The validator MUST NOT have implemented, edited, generated, paired on, or
+remediated the candidate. It MUST truthfully report
+`implementedCandidate: false` and `independenceAttested: true`. A validator that
+cannot make both attestations MUST abstain rather than emit false metadata.
 
-1. Reject the assignment if its identity appears in `candidateImplementerIds`
-   or it otherwise implemented the candidate.
-2. Validate the assignment before inspecting candidate behavior.
-3. Resolve the assigned commit and prove the inspected `HEAD` is exactly that
-   commit before running checks.
-4. Confirm tracked files and non-ignored untracked paths are clean before
-   validation.
-5. Run only the exact `argv` and working directory in
-   `approvedValidationCommands`, without a shell or command rewriting.
-6. Collect the evidence required by every criterion. Command evidence records
-   the exact arguments, working directory, exit code or signal, output excerpt
-   or retained artifact, and a SHA-256 digest.
-7. Recheck `HEAD`, its tree, the index, tracked files, and non-ignored untracked
-   paths after validation.
-8. Emit a result; never edit, format, fix, install into, commit, merge, rebase,
-   reset, stash, or otherwise remediate the candidate.
+The validator MUST:
 
-The protocol permits only these additional read-only Git identity and integrity
-operations:
+1. schema-validate the assignment;
+2. resolve the assigned commit and `HEAD`, require exact equality, and require a
+   clean Git status before candidate checks;
+3. inspect repository content only through safe read-only operations;
+4. execute each approved validation command through the available command
+   interface while preserving its exact `argv`, working directory, timeout, and
+   expected exit codes;
+5. collect evidence for every acceptance criterion;
+6. resolve `HEAD` and check Git status again after candidate checks;
+7. emit a schema-valid result and validate the assignment/result pair; and
+8. leave the candidate, index, refs, and repository state unchanged.
+
+Safe read-only file listing, searching, and reading are permitted, as are the
+schema checker, canonicalization and hashing utilities, and read-only Git commands
+needed to resolve `HEAD`, resolve the assigned commit, and inspect status. These
+operations do not expand the approved validation-command list. When a host
+command interface accepts a shell string, preserve the assigned argument tokens
+with safe quoting; do not add interpolation, operators, redirection, pipelines,
+wrappers, flags, or extra commands.
+
+The validator MUST NOT edit or format source, update fixtures, install
+dependencies, clean, stash, commit, merge, rebase, reset, cherry-pick, switch, or
+check out the candidate. It MUST NOT execute an approved command whose stated
+purpose is to alter candidate source, the index, or refs; that is an `error`.
+Incidental ignored build outputs are outside the Git-status claim described
+below. Findings are reported, never remediated.
+
+## Assignment binding
+
+Every result binds the complete schema-valid assignment with
+`assignmentDigest`:
+
+1. serialize the assignment with RFC 8785 JSON Canonicalization Scheme (JCS);
+2. hash the canonical JSON's UTF-8 bytes with SHA-256; and
+3. encode the value as `sha256:` followed by lowercase hexadecimal.
+
+Changing any assignment field invalidates the earlier result.
+
+## Revision verification
+
+Before candidate checks, resolve the full assigned commit and the repository's
+full `HEAD`. A candidate verdict requires both values to equal
+`candidateRevision` and requires an empty Git status. Record the resolved `HEAD`
+as `inspectedRevision`.
+
+After candidate checks, resolve `HEAD` again and record it as
+`revisionVerification.postCheckRevision`; check Git status again. Record:
+
+- `status`: `verified`, `mismatch`, or `unavailable`;
+- `postCheckRevision`: the resolved revision or `null`;
+- `cleanBeforeChecks` and `cleanAfterChecks`: booleans or `null`; and
+- `evidenceIds` supporting the decision.
+
+`verified` means `inspectedRevision` and `postCheckRevision` both equal the
+assigned revision and both cleanliness checks are `true`. `unavailable` means no
+revision or cleanliness state was established: both revisions and both
+cleanliness values are `null`. Every other combination is `mismatch`, including a
+different revision, dirty state, drift, or partial verification. Only `verified`
+permits `pass` or `fail`; an execution or evidence `error` may still report
+`verified` when the full repository check succeeded.
+
+When any revision or cleanliness state is reported, `evidenceIds` must reference
+`revisionProof` evidence whose excerpt has this exact space-separated form:
 
 ```text
-git rev-parse --verify <assigned-commit>^{commit}
-git rev-parse HEAD
-git rev-parse HEAD^{tree}
-git status --porcelain=v1 --untracked-files=all
-git diff --no-ext-diff --quiet
-git diff --cached --quiet
+assigned=<commit> inspected=<commit|null> post_check=<commit|null> clean_before=<true|false|null> clean_after=<true|false|null>
 ```
 
-The validator records the preflight and postflight commit as
-`preflightRevision` and `postflightRevision`, in addition to `assignedRevision`,
-`resolvedRevision`, and `inspectedRevision`. It also records both tree object IDs
-and the SHA-256 of the full porcelain output in `revisionVerification` and
-revision evidence. A clean status uses the SHA-256 of empty bytes. Any other
-command must be explicitly present in the assignment.
+The values must exactly match the assignment and structured result fields. Digest
+the excerpt using the normal evidence rule.
 
-`--untracked-files=all` covers tracked state and non-ignored untracked paths; Git
-porcelain does not report ignored paths. The orchestrator must place ignored
-caches and generated outputs outside the candidate tree, or independently enforce
-and observe those paths with a read-only mount or sandbox. Porcelain status alone
-is not evidence that ignored paths remained unchanged.
+Git status reports tracked files and non-ignored untracked files. It does not
+prove anything about ignored files. The result must not claim broader coverage
+than its evidence supports.
 
 ## Outcome semantics
 
 Outcome precedence is `error`, then `fail`, then `pass`.
 
-- `pass` means the validator is independent, the assigned revision was verified
-  and remained unchanged, every required criterion and approved command passed,
-  all required evidence was collected, and there are no findings, errors, or
-  failure signatures.
-- `fail` is a candidate verdict. The exact revision was validated reliably, all
-  required work reached a candidate conclusion, and at least one acceptance
-  criterion failed. It requires a blocking finding with severity, expected and
-  actual behavior, repository location, supporting evidence, and a deterministic
-  candidate failure signature.
-- `error` withholds a candidate verdict. Use it for an invalid assignment,
-  unresolved or mismatched revision, dirty or mutated candidate, unapproved
-  command, process spawn failure, missing tool, timeout, permission or network
-  failure, or insufficient evidence. It requires a structured error, evidence,
-  and an infrastructure or protocol signature, and it must not contain candidate
-  findings.
+- `pass` means revision verification is `verified`, every acceptance criterion
+  passed with sufficient evidence, and every approved command passed. It has no
+  findings, errors, or failure signatures.
+- `fail` is a candidate verdict. Revision verification is `verified`, validation
+  completed conclusively, and at least one acceptance criterion failed. Every
+  failed criterion has a blocking structured finding, supporting evidence, and a
+  deterministic failure signature. It has no errors.
+- `error` withholds a candidate verdict because validation was incomplete or
+  untrustworthy. Examples include inaccessible repository context, revision
+  mismatch, dirty repository, prohibited command, missing executable, timeout,
+  permission failure, insufficient evidence, or post-check drift. It has a
+  structured error and deterministic failure signature, and no findings.
 
-A nonzero command exit is `failed` only when the process ran reliably and the
-exit demonstrates candidate behavior. Failure to start, timeout, signal,
-unavailable dependency, or untrustworthy output is `error`.
+A schema-invalid assignment is rejected before this result contract applies. Do
+not fabricate a v1 result for an input that is not a v1 assignment.
 
-## Evidence and references
+An unexpected command exit is `fail` only when reliable evidence shows candidate
+behavior that violates a criterion. Failure to start, timeout, missing tooling,
+or ambiguous output is `error`.
 
-Every executed check, command result, revision verification, finding, and error
-references evidence IDs. Evidence is typed, timestamped, digest-backed, and
-contains either a minimal excerpt or a retained repository-relative artifact.
-Findings reference acceptance criteria and relevant artifact locations. IDs must
-be unique within their collection, and every reference must resolve.
+## Result, evidence, and findings
 
-JSON Schema validates each document's shape. After both documents pass their
-schemas, the zero-dependency pair-level checker additionally verifies
-cross-document bindings and the canonical assignment digest, reference integrity,
-command authorization, criterion coverage, independence, outcome semantics, and
-signature hashes. Its source-checkout path is
-`src/independent-validator-contracts.js`; CLI installations place the same module
-at `.ai-playbook/contracts/independent-validator/validate.cjs`. Consumers call its
-exported `validateIndependentValidatorPair(assignment, result)` only after
-schema-validating both inputs.
+`v1/result.schema.json` reports the assignment binding, outcome, inspected
+revision, revision verification, executed checks, command results, findings,
+evidence, errors, failure signatures, and validator metadata.
 
-## Enforcement boundary
+Each executed check identifies its acceptance criterion and references the
+command results and evidence supporting its `pass`, `fail`, or `error` status.
+Each command result repeats the exact approved command identity, arguments, and
+working directory and reports its status, exit code, duration, and evidence.
 
-Contracts can make claims internally consistent, but they cannot prove who
-implemented code, that a process actually ran with the reported argv, that a
-command had no hidden filesystem or network side effects, or that retained
-evidence bytes are truthful. The orchestrator must provide authenticated validator
-and implementer identities, a fresh disposable workspace, process-level argv and
-network enforcement, and an external result sink. A read-only mount is preferred
-when approved checks can run on one. Because Git porcelain omits ignored paths,
-the orchestrator must keep ignored caches and generated outputs outside the
-candidate tree or enforce their immutability through the sandbox.
+Evidence is typed and digest-backed. Its `digest` is the SHA-256 of the UTF-8
+bytes of its exact `excerpt`, encoded with the `sha256:` prefix. Evidence may also
+identify its producing command or relevant artifact.
 
-The pair-level checker deliberately does not guess whether an arbitrary executable
-is mutating or networked. The validator rejects such an assignment under the hard
-read-only and network gates before execution, and the orchestrator sandbox is the
-authoritative enforcement layer.
+Each candidate finding has a severity, stable code, expected and actual behavior,
+affected criterion IDs, supporting evidence IDs, an optional repository location,
+and one failure-signature reference. Infrastructure and protocol problems belong
+in `errors`, not findings. Every reference ID must resolve.
+
+The documents are attestations. Schemas and pair validation establish their
+shape, binding, references, and internal consistency; they do not independently
+prove that reported events occurred. A consumer may apply its own trust controls
+without changing this contract or the validator workflow.
 
 ## Deterministic failure signatures
 
-Each signature has a `basis` containing:
+Each failure-causing finding and each error has one signature. Its `basis`
+contains exactly:
 
 1. `namespace`
-2. `category`
-3. `sourceType`
-4. `sourceId`
-5. `code`
-6. `context`
+2. `sourceType`
+3. `sourceId`
+4. `code`
+5. `context`
 
-`sourceId` links the signature to its finding or error, but it is deliberately
-excluded from the hash so a run-local record ID cannot destabilize the failure
-signature. `context` is an object containing exactly three sorted, unique arrays:
-`criterionIds`, `commandIds`, and `artifactPaths`. Sort array strings
-lexicographically by UTF-16 code units, matching RFC 8785's property-name ordering.
+`sourceId` links the signature to its finding or error but is deliberately
+excluded from the hash. Derive the `context` arrays as follows, then sort and
+deduplicate each one lexicographically by UTF-16 code units:
 
-Derive finding context from the finding's exact criterion IDs and location path,
-plus command evidence sources referenced by the finding. Derive error context
-from its linked command result and command evidence sources, the acceptance
-criterion IDs assigned to those commands, and referenced artifact-evidence paths.
-Do not add free-form or run-specific context.
+- For a finding, `criterionIds` is the finding's exact `criterionIds`.
+- For an error, `criterionIds` contains the criteria assigned to the derived
+  command IDs.
+- `commandIds` contains `commandId` values from evidence referenced by the source,
+  plus the assigned command reached through an error's `commandResultId`.
+- `artifactPaths` contains `artifactPath` values from evidence referenced by the
+  source, plus a finding's `location.path` when present.
 
-The signature category is also derived, not chosen per run: findings use
-`candidate`; errors at `assignment`, `independence`, `revision-verification`, or
-`finalization` stages use `protocol`; errors at `execution` or
-`evidence-collection` stages use `infrastructure`.
+Do not include timestamps, durations, absolute repository paths, random values,
+or raw output.
 
-Serialize `context` with RFC 8785 JCS, then compute `value` from these five UTF-8
-values in this exact order, joined by one LF byte with no trailing LF:
+Compute `value` as the SHA-256 of the UTF-8 JCS serialization of:
 
-```text
-namespace
-category
-sourceType
-code
-<RFC 8785 canonical JSON context>
+```json
+{
+  "namespace": "independent-validator/v1",
+  "sourceType": "finding",
+  "code": "SOURCE_CODE",
+  "context": {
+    "criterionIds": [],
+    "commandIds": [],
+    "artifactPaths": []
+  }
+}
 ```
 
-Hash those bytes with SHA-256 and prefix the lowercase hexadecimal digest with
-`sha256:`. Never include `sourceId`, timestamps, durations, absolute workspace
-paths, random values, or raw output in the hash input. Sort `failureSignatures`
-lexicographically by `value`. The same underlying failure then produces the same
-signature across validation runs even when result-record IDs differ.
+Use `sourceType: "error"` for an error. Hash the basis's actual `sourceType`,
+`code`, and `context`, then encode the digest as `sha256:` followed by lowercase
+hexadecimal. The same underlying problem therefore keeps the same signature even
+when run-local source IDs change.
 
-## Examples and validation
+## Validation and examples
 
-`v1/examples/` contains one assignment and three result examples:
+`v1/examples/` contains one assignment and pass, fail, and
+infrastructure-error results. After both documents pass their schemas, call
+`validateIndependentValidatorPair(assignment, result)` to verify the assignment
+digest, approved-command fidelity, reference integrity, outcome semantics,
+revision requirements, evidence digests, independence attestations, and failure
+signatures.
 
-- `pass-result.json`
-- `fail-result.json`
-- `infrastructure-error-result.json`
-
-From an ai-playbook source checkout, run `npm test` to compile both schemas in
-strict mode, validate all examples, and exercise pair-level semantic invariants.
+From a source checkout, `npm test` validates the schemas, examples, and pair-level
+semantic rules.
