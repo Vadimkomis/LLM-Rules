@@ -159,6 +159,18 @@ async function exists(filePath) {
   }
 }
 
+async function filesMatch(sourcePath, destinationPath) {
+  try {
+    const [source, destination] = await Promise.all([
+      fs.readFile(sourcePath),
+      fs.readFile(destinationPath)
+    ]);
+    return source.equals(destination);
+  } catch {
+    return false;
+  }
+}
+
 async function copyFileSafe(sourcePath, destinationPath, options, result) {
   const alreadyExists = await exists(destinationPath);
   if (alreadyExists && !options.force) {
@@ -215,12 +227,30 @@ async function installInit(args, io) {
     args,
     result
   );
+  await copyDirectorySafe(
+    path.join(root, "contracts", "independent-validator"),
+    path.join(target, ".ai-playbook", "contracts", "independent-validator"),
+    args,
+    result
+  );
+  await copyFileSafe(
+    path.join(root, "src", "independent-validator-contracts.js"),
+    path.join(
+      target,
+      ".ai-playbook",
+      "contracts",
+      "independent-validator",
+      "validate.cjs"
+    ),
+    args,
+    result
+  );
 
   if (args.agent === "codex" || args.agent === "both") {
     await copyFileSafe(path.join(root, "Codex", "AGENTS.md"), path.join(target, "AGENTS.md"), args, result);
     await copyDirectorySafe(
       path.join(root, "Codex", "skills"),
-      path.join(target, "Codex", "skills"),
+      path.join(target, "skills"),
       args,
       result
     );
@@ -229,6 +259,12 @@ async function installInit(args, io) {
     await copyFileSafe(
       path.join(root, "Claude", "CLAUDE.md"),
       path.join(target, "CLAUDE.md"),
+      args,
+      result
+    );
+    await copyDirectorySafe(
+      path.join(root, "Claude", "agents"),
+      path.join(target, ".claude", "agents"),
       args,
       result
     );
@@ -274,26 +310,95 @@ async function installInit(args, io) {
 
 async function runDoctor(args, io) {
   const target = path.resolve(args.target);
+  const root = repoRoot();
   const checks = [
     { name: "features.md", path: path.join(target, "features.md") },
     { name: "evals.md", path: path.join(target, "evals.md") },
-    { name: ".ai-playbook-manifest.json", path: path.join(target, ".ai-playbook-manifest.json") }
+    { name: ".ai-playbook-manifest.json", path: path.join(target, ".ai-playbook-manifest.json") },
+    {
+      name: "independent-validator/v1/assignment.schema.json",
+      path: path.join(
+        target,
+        ".ai-playbook",
+        "contracts",
+        "independent-validator",
+        "v1",
+        "assignment.schema.json"
+      ),
+      sourcePath: path.join(
+        root,
+        "contracts",
+        "independent-validator",
+        "v1",
+        "assignment.schema.json"
+      )
+    },
+    {
+      name: "independent-validator/v1/result.schema.json",
+      path: path.join(
+        target,
+        ".ai-playbook",
+        "contracts",
+        "independent-validator",
+        "v1",
+        "result.schema.json"
+      ),
+      sourcePath: path.join(
+        root,
+        "contracts",
+        "independent-validator",
+        "v1",
+        "result.schema.json"
+      )
+    },
+    {
+      name: "independent-validator/validate.cjs",
+      path: path.join(
+        target,
+        ".ai-playbook",
+        "contracts",
+        "independent-validator",
+        "validate.cjs"
+      ),
+      sourcePath: path.join(root, "src", "independent-validator-contracts.js")
+    }
+  ];
+  const codexChecks = [
+    { name: "AGENTS.md", path: path.join(target, "AGENTS.md") },
+    {
+      name: "skills/validate-feature-candidate/SKILL.md",
+      path: path.join(target, "skills", "validate-feature-candidate", "SKILL.md"),
+      sourcePath: path.join(
+        root,
+        "Codex",
+        "skills",
+        "validate-feature-candidate",
+        "SKILL.md"
+      )
+    }
+  ];
+  const claudeChecks = [
+    { name: "CLAUDE.md", path: path.join(target, "CLAUDE.md") },
+    {
+      name: ".claude/agents/independent-validator.md",
+      path: path.join(target, ".claude", "agents", "independent-validator.md"),
+      sourcePath: path.join(root, "Claude", "agents", "independent-validator.md")
+    }
   ];
   const agentChecks = {
-    codex: [{ name: "AGENTS.md", path: path.join(target, "AGENTS.md") }],
-    claude: [{ name: "CLAUDE.md", path: path.join(target, "CLAUDE.md") }],
-    both: [
-      { name: "AGENTS.md", path: path.join(target, "AGENTS.md") },
-      { name: "CLAUDE.md", path: path.join(target, "CLAUDE.md") }
-    ]
+    codex: codexChecks,
+    claude: claudeChecks,
+    both: [...codexChecks, ...claudeChecks]
   };
   checks.push(...agentChecks[args.agent]);
 
   let failures = 0;
   for (const check of checks) {
-    const ok = await exists(check.path);
-    io.stdout.write(`${ok ? "OK  " : "MISS"} ${check.name}\n`);
-    if (!ok) {
+    const present = await exists(check.path);
+    const matches = present && (!check.sourcePath || (await filesMatch(check.sourcePath, check.path)));
+    const status = !present ? "MISS" : matches ? "OK  " : "BAD ";
+    io.stdout.write(`${status} ${check.name}\n`);
+    if (!matches) {
       failures += 1;
     }
   }

@@ -1,0 +1,120 @@
+{
+  "contractVersion": "1.0.0",
+  "assignmentId": "IVA-EXAMPLE-001",
+  "candidateRevision": {
+    "vcs": "git",
+    "algorithm": "sha1",
+    "commit": "1111111111111111111111111111111111111111"
+  },
+  "repositoryContext": {
+    "repositoryRoot": ".",
+    "validationWorkspace": "/tmp/ai-playbook-validator-example",
+    "vcs": "git",
+    "candidateImplementerIds": [
+      "agent-implementer-42"
+    ],
+    "contextNotes": [
+      "The orchestrator supplied a disposable checkout at the assigned commit.",
+      "No network access is needed for the approved checks."
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "AC-001",
+      "description": "The shared v1 assignment and result contracts validate all published examples.",
+      "required": true,
+      "evidenceRequirements": [
+        {
+          "id": "ER-AC-001-COMMAND",
+          "kind": "commandOutput",
+          "description": "Output from the focused contract test suite.",
+          "minimumCount": 1
+        }
+      ]
+    },
+    {
+      "id": "AC-002",
+      "description": "CLI initialization installs the selected validator workflow, contracts, and semantic checker, and doctor integrity-verifies the managed validator files.",
+      "required": true,
+      "evidenceRequirements": [
+        {
+          "id": "ER-AC-002-COMMAND",
+          "kind": "commandOutput",
+          "description": "Output from the CLI test suite.",
+          "minimumCount": 1
+        }
+      ]
+    }
+  ],
+  "approvedValidationCommands": [
+    {
+      "id": "CMD-CONTRACT-TEST",
+      "argv": [
+        "node",
+        "--test",
+        "tests/independent-validator-contracts.test.js"
+      ],
+      "workingDirectory": ".",
+      "timeoutMs": 120000,
+      "expectedExitCodes": [
+        0
+      ],
+      "required": true,
+      "criterionIds": [
+        "AC-001"
+      ]
+    },
+    {
+      "id": "CMD-CLI-TEST",
+      "argv": [
+        "node",
+        "--test",
+        "tests/cli.test.js"
+      ],
+      "workingDirectory": ".",
+      "timeoutMs": 120000,
+      "expectedExitCodes": [
+        0
+      ],
+      "required": true,
+      "criterionIds": [
+        "AC-002"
+      ]
+    }
+  ],
+  "constraints": {
+    "candidateMustRemainUnmodified": true,
+    "validatorMustNotHaveImplementedCandidate": true,
+    "networkPolicy": "forbidden",
+    "additionalConstraints": [
+      "Do not install dependencies during validation.",
+      "Do not update snapshots or generated fixtures."
+    ]
+  },
+  "relevantArtifactPaths": [
+    {
+      "id": "ART-ASSIGNMENT-SCHEMA",
+      "path": "contracts/independent-validator/v1/assignment.schema.json",
+      "purpose": "Assignment contract under validation.",
+      "required": false
+    },
+    {
+      "id": "ART-RESULT-SCHEMA",
+      "path": "contracts/independent-validator/v1/result.schema.json",
+      "purpose": "Result contract under validation.",
+      "required": false
+    },
+    {
+      "id": "ART-CLI",
+      "path": "src/cli.js",
+      "purpose": "CLI installation and doctor behavior.",
+      "required": true
+    },
+    {
+      "id": "ART-CONTRACT-TESTS",
+      "path": "tests/independent-validator-contracts.test.js",
+      "purpose": "Automated schema and semantic validation.",
+      "required": false
+    }
+  ]
+}
