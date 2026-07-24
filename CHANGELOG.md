@@ -6,6 +6,8 @@ This project follows Semantic Versioning. The structure below is inspired by Kee
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-24
+
 ### Added
 - Added an independent validation capability shared across Claude and Codex:
   - `Claude/agents/independent-validator.md` for evidence-backed validation by a role that did not implement or modify the candidate.
@@ -20,6 +22,18 @@ This project follows Semantic Versioning. The structure below is inspired by Kee
   Updated `doctor` to integrity-check the schemas, checker, and installed Codex
   validator skill and to reject altered managed files.
 - Excluded machine-local Claude permission overrides from published packages.
+
+## [1.0.5] - 2026-05-19
+
+### Added
+- Added the `app-localization` Codex skill for string extraction, translation
+  resources, placeholders, plurals, locale coverage, and layout validation.
+
+### Changed
+- Documented the localization skill in the Codex workflow, README, and feature
+  inventory.
+- Clarified that Claude and its specialist agents push completed changes
+  immediately after committing.
 
 ## [1.0.4] - 2026-03-31
 
