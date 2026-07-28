@@ -107,6 +107,10 @@ test("init --agent both adds validator contracts without changing agent destinat
       (error) => error.code === "ENOENT"
     );
   }
+  const installedEvals = await fs.readFile(path.join(target, "evals.md"), "utf8");
+  assert.match(installedEvals, /- Test mapping:/);
+  assert.doesNotMatch(installedEvals, /^-\s+Status:/m);
+  assert.doesNotMatch(installedEvals, /Status Legend/);
   const installedChecker = require(
     path.join(
       target,

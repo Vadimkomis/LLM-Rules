@@ -13,7 +13,8 @@ Each project should have its own `CLAUDE.md` at the repo root as the **micro** �
 2. Create a `CLAUDE.md` in the project root with project-specific details (micro)
 3. The micro `CLAUDE.md` should **not** duplicate macro rules — only add what's specific to that project
 4. Create a `features.md` in the project root — this is the **single source of truth** for all features (see [Feature Tracking](#feature-tracking) below)
-5. Set up a linter configuration appropriate to the project's language(s)
+5. Create an `evals.md` in the project root — this is the **single source of truth** for project eval contracts (see [Evals](#evals) below)
+6. Set up a linter configuration appropriate to the project's language(s)
 
 ---
 
@@ -46,6 +47,33 @@ Feature: <domain or category>
 - **Scenario** — one per feature; the scenario name is the feature name
 - **Given/When/Then** — describes the feature from the user's perspective
 - **Status** — tracked as `And the status is "..."` on the last line of each scenario
+
+---
+
+## Evals
+
+Every project **must** have an `evals.md` file at the repo root. This file is the **single source of truth** for eval contracts and their automated test mappings.
+
+Test runners and CI are the authoritative source for pass/fail results. Do not manually record transient eval statuses in `evals.md`.
+
+### Rules
+
+- **Create `evals.md` at project inception** — it should be one of the first files in any new project
+- **Always consult `evals.md` before implementing** — verify existing eval scenarios and identify gaps
+- **Update `evals.md` whenever behavior changes** — new features, bug fixes, and behavioral changes must update eval definitions and test mappings
+- **Never contradict `evals.md`** — if implementation and eval spec drift, align code to the spec (or update the spec first with the user's approval)
+- When I report a bug, don't start by trying to fix it. Instead, start by writing a test that reproduces the bug. Then have subagents try to fix the bug and prove it with a passing test.
+
+### Structure
+
+Each eval entry should include:
+
+- **Eval name** — short, descriptive title
+- **Description** — what behavior is validated and why it matters
+- **Test mapping** — automated test files or cases that enforce the contract, or the target feature/PR that will add them
+- **Notes** — relevant fixtures, thresholds, datasets, and execution details
+
+The exact format can be adapted per project, but every eval entry must at minimum have a name, description, and test mapping. Do not include a manually maintained status field.
 
 ---
 
@@ -214,6 +242,3 @@ Use these specialized agents (via the Task tool) for targeted work. Each agent r
 4. **Test** — use `senior-qa-engineer` to ensure coverage
 5. **Simplify** — use `code-simplification-architect` if the result is complex
 6. **Validate** — freeze the candidate at an immutable revision, then use `independent-validator` for evidence-backed validation
-
-### Bug Fixes
-When I report a bug, don't start by trying to fix it. Instead, start by writing a test that reproduces the bug. Then have subagents try to fix the bug and prove it with a passing test. 
