@@ -11,7 +11,7 @@ This file mirrors the macro development rules for Codex CLI usage (open-source a
 2. Create an `AGENTS.md` in the project root as the Codex mirror
 3. Keep this `AGENTS.md` aligned with `../Claude/CLAUDE.md`; do not diverge except for the skills/agents adaptation
 4. Create a `features.md` in the project root — this is the **single source of truth** for all features (see [Feature Tracking](#feature-tracking) below)
-5. Create an `evals.md` in the project root — this is the **single source of truth** for project evals (see [Evals](#evals) below)
+5. Create an `evals.md` in the project root — this is the **single source of truth** for project eval contracts (see [Evals](#evals) below)
 6. Set up a linter configuration appropriate to the project's language(s)
 
 ---
@@ -53,26 +53,28 @@ The exact format can be adapted per project, but every entry must at minimum hav
 
 ## Evals
 
-Every project **must** have an `evals.md` file at the repo root. This file is the **single source of truth** for eval coverage in the project.
+Every project **must** have an `evals.md` file at the repo root. This file is the **single source of truth** for eval contracts and their automated test mappings.
+
+Test runners and CI are the authoritative source for pass/fail results. Do not manually record transient eval statuses in `evals.md`.
 
 ### Rules
 
 - **Create `evals.md` at project inception** — it should be one of the first files in any new project
 - **Always consult `evals.md` before implementing** — verify existing eval scenarios and identify gaps
-- **Update `evals.md` whenever behavior changes** — new features, bug fixes, and behavioral changes must update eval definitions and status
+- **Update `evals.md` whenever behavior changes** — new features, bug fixes, and behavioral changes must update eval definitions and test mappings
 - **Never contradict `evals.md`** — if implementation and eval spec drift, align code to the spec (or update the spec first with the user's approval)
-- When I report a bug, don't start by trying to fix it. Instead, start by writing a test that reproduces the bug. Then have subagents try to fix the bug and prove it with a passing test. 
+- When I report a bug, don't start by trying to fix it. Instead, start by writing a test that reproduces the bug. Then have subagents try to fix the bug and prove it with a passing test.
 
 ### Structure
 
 Each eval entry should include:
 
 - **Eval name** — short, descriptive title
-- **Status** — e.g., `planned`, `in-progress`, `passing`, `failing`, `deprecated`
 - **Description** — what behavior is validated and why it matters
+- **Test mapping** — automated test files or cases that enforce the contract, or the target feature/PR that will add them
 - **Notes** — relevant fixtures, thresholds, datasets, and execution details
 
-The exact format can be adapted per project, but every eval entry must at minimum have a name, status, and description.
+The exact format can be adapted per project, but every eval entry must at minimum have a name, description, and test mapping. Do not include a manually maintained status field.
 
 ---
 
