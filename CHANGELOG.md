@@ -6,6 +6,16 @@ This project follows Semantic Versioning. The structure below is inspired by Kee
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-07-28
+
+### Fixed
+- Made test runners and CI authoritative for eval pass/fail results instead of
+  relying on manually maintained status fields.
+- Aligned the Claude and Codex eval guidance around stable contracts and
+  automated test mappings.
+- Updated the generated `evals.md` template and installer regression coverage
+  to prevent the deprecated status fields from returning.
+
 ## [1.1.0] - 2026-07-24
 
 ### Added
