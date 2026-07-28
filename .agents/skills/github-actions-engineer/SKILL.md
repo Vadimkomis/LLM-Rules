@@ -1,11 +1,17 @@
 ---
 name: github-actions-engineer
-description: Build, debug, and optimize GitHub Actions CI/CD workflows. Use when authoring workflow YAML, fixing failing runs, improving cache/matrix performance, tightening permissions, and hardening release pipelines.
+description: Builds, debugs, and optimizes GitHub Actions CI/CD workflows. Use when authoring workflow YAML, fixing failing runs, improving cache/matrix performance, tightening permissions, and hardening release pipelines.
 ---
 
 # GitHub Actions Engineer
 
 Design reliable and secure CI/CD workflows.
+
+## Inputs
+
+Use the workflow goal or failing run, existing workflow files, repository test
+commands, runner constraints, and deployment environments. For a failure, start
+from the first causal error rather than the final cascade.
 
 ## Workflow
 
@@ -29,6 +35,13 @@ Design reliable and secure CI/CD workflows.
 2. Reproduce locally when possible.
 3. Verify runner assumptions (shell, tools, paths).
 4. Patch minimally and re-run targeted workflow paths.
+
+## Safety
+
+- Never print, fetch, rotate, or guess secret values.
+- Do not trigger deployments, releases, or privileged workflows unless the user
+  explicitly requests that external action.
+- Diagnose without edits when the user asks only for a root cause.
 
 ## Output
 

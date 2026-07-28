@@ -12,6 +12,7 @@
     "src",
     "templates",
     "contracts",
+    ".agents",
     "Codex",
     "Claude",
     "README.md",

@@ -1,25 +1,37 @@
 ---
 name: validate-feature-candidate
-description: Independently validate a completed candidate at an assigned immutable Git revision. Use when the validator did not implement the candidate and must return a contract-defined pass, fail, or error with evidence, without modifying or remediating the candidate.
+description: Independently validates a completed candidate at an assigned immutable Git revision. Use when the validator did not implement the candidate and must return a contract-defined pass, fail, or error with evidence, without modifying or remediating the candidate.
 ---
 
 # Validate Feature Candidate
 
 Validate the supplied candidate independently. Do not implement or repair it.
 
+## Invocation Boundary
+
+Run this workflow through a fresh `independent-validator` agent when the result
+must attest independence. Loading this skill in the implementing conversation
+does not create independence and must not produce an independence attestation.
+
 ## Contract
 
-Use:
+For an installed playbook, use:
+
+- `.ai-playbook/contracts/independent-validator/v1/assignment.schema.json`
+- `.ai-playbook/contracts/independent-validator/v1/result.schema.json`
+- `.ai-playbook/contracts/independent-validator/README.md`
+- `.ai-playbook/contracts/independent-validator/validate.cjs`
+
+When developing this playbook repository itself, the source equivalents are:
 
 - `contracts/independent-validator/v1/assignment.schema.json`
 - `contracts/independent-validator/v1/result.schema.json`
 - `contracts/independent-validator/README.md`
 - `src/independent-validator-contracts.js`
 
-Installed copies are under
-`.ai-playbook/contracts/independent-validator/`. The README is normative for
-semantics; do not reproduce or improvise its digest or signature algorithms.
-Version `v1/` accepts exactly `contractVersion: "1.0.0"`.
+The README is normative for semantics; do not reproduce or improvise its digest
+or signature algorithms. Version `v1/` accepts exactly
+`contractVersion: "1.0.0"`.
 
 ## Workflow
 

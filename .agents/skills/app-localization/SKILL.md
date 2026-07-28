@@ -1,6 +1,6 @@
 ---
 name: app-localization
-description: Create, review, and maintain app localization across iOS, Android, web, and cross-platform apps. Use when extracting user-facing strings, adding locale files, translating app copy, validating placeholders/plurals, auditing missing translations, or making UI safe for multiple languages.
+description: Creates, reviews, and maintains app localization across iOS, Android, web, and cross-platform apps. Use when extracting user-facing strings, adding locale files, translating app copy, validating placeholders/plurals, auditing missing translations, or making UI safe for multiple languages.
 ---
 
 # App Localization

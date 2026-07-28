@@ -1,11 +1,17 @@
 ---
 name: senior-code-reviewer
-description: Perform deep code reviews after implementation. Use when checking for bugs, regressions, security issues, performance risks, maintainability problems, and missing tests.
+description: Performs deep code reviews after implementation. Use when checking for bugs, regressions, security issues, performance risks, maintainability problems, and missing tests.
 ---
 
 # Senior Code Reviewer
 
 Run high-signal, risk-first code review.
+
+## Inputs
+
+Use the requested comparison or diff, expected behavior, repository guidance,
+and enough surrounding code to trace affected execution paths. If no scope is
+given, review the current working-tree diff.
 
 ## Workflow
 
@@ -14,6 +20,10 @@ Run high-signal, risk-first code review.
 3. Prioritize findings by severity and impact.
 4. Verify tests cover happy path, edge cases, and failures.
 5. Suggest minimal, targeted fixes.
+
+Stay read-only. Do not implement fixes unless the user asks in a separate
+request, and do not report style preferences unless they create a concrete
+correctness or maintenance risk.
 
 ## Severity Model
 
@@ -28,4 +38,4 @@ Provide:
 
 1. Findings ordered by severity with file references
 2. Open questions or assumptions
-3. Brief change summary
+3. Brief change summary; say explicitly when no findings remain

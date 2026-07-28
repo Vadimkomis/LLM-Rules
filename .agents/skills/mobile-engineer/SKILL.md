@@ -1,11 +1,16 @@
 ---
 name: mobile-engineer
-description: Build and review mobile app features across iOS and Android concerns. Use when implementing mobile UI flows, app architecture, lifecycle handling, performance tuning, offline behavior, and mobile-specific testing.
+description: Builds and reviews mobile app features across iOS and Android concerns. Use when implementing mobile UI flows, app architecture, lifecycle handling, performance tuning, offline behavior, and mobile-specific testing.
 ---
 
 # Mobile Engineer
 
 Implement mobile features with platform-safe behavior.
+
+## Inputs
+
+Use the target platforms and OS versions, existing architecture, expected user
+flow, accessibility requirements, and available device or simulator coverage.
 
 ## Workflow
 
@@ -28,6 +33,10 @@ Implement mobile features with platform-safe behavior.
 - Add unit tests for business logic.
 - Add UI/integration coverage for critical user flows.
 - Include regression tests for device or OS-specific bugs.
+
+When the user asks for review or diagnosis, report findings without changing
+the app. When implementation is requested, preserve platform conventions and
+existing supported OS ranges.
 
 ## Output
 

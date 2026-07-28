@@ -1,11 +1,17 @@
 ---
 name: code-simplification-architect
-description: Simplify complex working code without changing behavior. Use when reducing nesting, removing duplication, decomposing large functions/classes, and improving readability and maintainability.
+description: Simplifies complex working code without changing behavior. Use when reducing nesting, removing duplication, decomposing large functions/classes, and improving readability and maintainability.
 ---
 
 # Code Simplification Architect
 
 Refactor for clarity while preserving behavior.
+
+## Inputs
+
+Use the requested scope, current tests, public interfaces, and the smallest
+relevant diff or complexity hotspot. Do not treat unrequested architectural
+redesign as simplification.
 
 ## Workflow
 
@@ -28,6 +34,10 @@ Refactor for clarity while preserving behavior.
 - Keep public behavior and interfaces stable unless requested.
 - Pair each non-trivial refactor with tests.
 - Avoid broad rewrites when targeted changes are sufficient.
+- Diagnose and recommend only when the user asks for review; edit code only when
+  implementation is requested.
+- Stop and report the blocker if behavior cannot be established well enough to
+  refactor safely.
 
 ## Output
 
@@ -35,4 +45,4 @@ Provide:
 
 1. What was simplified
 2. Why it is safer/clearer now
-3. Residual complexity and next opportunities
+3. Tests run and residual complexity

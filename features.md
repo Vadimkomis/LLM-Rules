@@ -133,6 +133,37 @@ Feature: Independent feature validation
     And pass means the acceptance criteria are satisfied, fail means the candidate violates them, and error means validation could not complete reliably
     And the status is "completed"
 
+Feature: Hybrid skills and agents
+
+  Scenario: Install skills into native discovery paths
+    Given the playbook contains platform-neutral workflow skills
+    When a project is initialized for Codex, Claude, or both
+    Then skills are installed under each selected platform's native project path
+    And all selected skills are available for direct or implicit invocation
+    And the status is "completed"
+
+  Scenario: Install thin platform agent adapters
+    Given a workflow benefits from isolation, delegation, or constrained permissions
+    When a project is initialized
+    Then platform-native agents load the corresponding shared skills
+    And reviewer agents remain non-editing
+    And writer agents receive explicit workspace scope
+    And the status is "completed"
+
+  Scenario: Preserve compatibility during layout migration
+    Given an older installation contains Codex skills under Codex/skills
+    When the installation is diagnosed or initialized again
+    Then doctor reports the non-native legacy layout
+    And init installs native copies without deleting legacy or user-owned files
+    And the status is "completed"
+
+  Scenario: Require a fresh independent validator
+    Given an implementing conversation loads the validation workflow
+    When an independence-attested result is required
+    Then validation runs through a fresh independent-validator agent
+    And the implementing conversation does not attest its own independence
+    And the status is "completed"
+
 Feature: Documentation and metadata
 
   Scenario: README

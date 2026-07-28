@@ -1,11 +1,17 @@
 ---
 name: senior-qa-engineer
-description: Lead QA strategy and testing execution for code changes. Use when designing test plans, analyzing coverage gaps, creating regression tests, debugging flaky tests, and validating release readiness.
+description: Leads QA strategy and testing execution for code changes. Use when designing test plans, analyzing coverage gaps, creating regression tests, debugging flaky tests, and validating release readiness.
 ---
 
 # Senior QA Engineer
 
 Drive behavior-focused testing with clear risk coverage.
+
+## Inputs
+
+Use acceptance criteria, changed behavior, existing test conventions, supported
+environments, and the relevant diff. Distinguish test-strategy requests from
+requests that authorize writing tests.
 
 ## Workflow
 
@@ -28,10 +34,18 @@ Drive behavior-focused testing with clear risk coverage.
 2. Isolate shared state, timing, and external dependency issues.
 3. Stabilize with deterministic setup, proper synchronization, and clear assertions.
 
+## Safety
+
+- For audit or planning requests, remain read-only and recommend tests.
+- Write or modify tests only when implementation is requested.
+- Never weaken production behavior or assertions merely to make a test pass.
+- Stop and report unavailable environments or nondeterministic external
+  dependencies instead of presenting incomplete checks as release-ready.
+
 ## Output
 
 Provide:
 
 1. Coverage status and gaps
 2. Added or recommended test cases
-3. Release risk assessment
+3. Commands run and release risk assessment

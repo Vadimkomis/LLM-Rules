@@ -220,25 +220,34 @@ The exact format can be adapted per project, but every eval entry must at minimu
 
 ---
 
-## Agents
+## Skills and Agents
 
-Use these specialized agents (via the Task tool) for targeted work. Each agent runs as a subagent with access to the full codebase.
+Skills under `.claude/skills/` contain reusable workflows. Agents under
+`.claude/agents/` preload those skills and add isolated context, permissions,
+and delegation. Use the skill directly for work that should remain in the
+current conversation; use the agent for independent criticism, noisy output,
+parallel work, or a constrained tool surface.
 
-| Agent | When to use |
-|-------|-------------|
-| `architecture-reviewer` | **Before** implementing significant changes — validates design, evaluates trade-offs, catches structural issues early |
-| `senior-code-reviewer` | **After** completing a feature or logical chunk of code — reviews for bugs, security, performance, and maintainability |
-| `senior-qa-engineer` | When you need test coverage analysis, test case design, TDD workflows, or flaky test debugging |
-| `independent-validator` | **After** a feature candidate is frozen at an immutable revision — independently runs approved checks without modifying the candidate and returns an evidence-backed pass, fail, or error result |
-| `code-simplification-architect` | When code works but is messy — simplifies nested logic, breaks down god classes, eliminates duplication |
-| `github-actions-engineer` | For creating, debugging, or optimizing GitHub Actions workflows and CI/CD pipelines |
-| `red-team-analyst` | **After** implementing security-sensitive features — adversarial review simulating how a hacker would break, exploit, or abuse the system |
+| Skill | Agent adapter | When to use |
+|-------|---------------|-------------|
+| `architecture-reviewer` | `architecture-reviewer` | Validate significant designs before implementation |
+| `senior-code-reviewer` | `senior-code-reviewer` | Review completed changes without modifying them |
+| `red-team-analyst` | `red-team-analyst` | Adversarially review high-risk attack surfaces |
+| `senior-qa-engineer` | `senior-qa-engineer` | Design or implement tests and diagnose flaky checks |
+| `validate-feature-candidate` | `independent-validator` | Validate an immutable candidate through a fresh agent |
+| `code-simplification-architect` | `code-simplification-architect` | Simplify working code without behavior changes |
+| `github-actions-engineer` | `github-actions-engineer` | Build, debug, or harden GitHub Actions |
+| `devops-engineer` | — | Design infrastructure, delivery, and observability |
+| `mobile-engineer` | — | Handle mobile lifecycle, performance, and platform behavior |
+| `app-localization` | — | Add or audit localization and translated resources |
 
 ### Usage pattern
 
-1. **Plan** — use `architecture-reviewer` to validate the approach
+1. **Plan** — use the `architecture-reviewer` agent for significant designs
 2. **Implement** — write the code
-3. **Review** — use `senior-code-reviewer` to catch issues
-4. **Test** — use `senior-qa-engineer` to ensure coverage
-5. **Simplify** — use `code-simplification-architect` if the result is complex
-6. **Validate** — freeze the candidate at an immutable revision, then use `independent-validator` for evidence-backed validation
+3. **Review** — delegate to `senior-code-reviewer`
+4. **Attack** — delegate to `red-team-analyst` for security-sensitive changes
+5. **Test** — use `senior-qa-engineer` when QA work benefits from isolation
+6. **Simplify** — apply the simplification skill or agent if complexity remains
+7. **Validate** — freeze the candidate, then spawn a fresh
+   `independent-validator`; a skill invoked by the implementer is not independent

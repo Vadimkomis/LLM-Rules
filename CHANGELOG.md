@@ -6,6 +6,28 @@ This project follows Semantic Versioning. The structure below is inspired by Kee
 
 ## [Unreleased]
 
+### Added
+- Added Codex custom-agent adapters under `Codex/agents/` and native
+  platform-agent installation for both Codex and Claude Code.
+- Added activation fixtures and static capability tests for all shared skills
+  and agent safety boundaries.
+
+### Changed
+- Moved canonical skills to `.agents/skills/`, which Codex discovers natively,
+  and made the CLI install the same skill sources under `.claude/skills/` for
+  Claude Code.
+- Updated both agent collections to be thin skill adapters, inherit the active
+  model, and use explicit read-only or workspace-write boundaries.
+- Added layout version 2 manifests and expanded `doctor` to check every skill,
+  agent, and capability manifest entry.
+- Required independent validation to run through a fresh validator agent when
+  independence is attested.
+
+### Deprecated
+- The legacy `Codex/skills/` installation layout. `init` now installs native
+  copies without deleting legacy files, and `doctor` reports legacy-only
+  installations as unhealthy.
+
 ## [1.1.1] - 2026-07-28
 
 ### Fixed

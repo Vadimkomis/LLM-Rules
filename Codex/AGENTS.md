@@ -1,7 +1,8 @@
 # Development Guidelines (Codex Mirror)
 
 > **Source of truth:** `../Claude/CLAUDE.md`.
-> This file should stay as close as possible to `../Claude/CLAUDE.md`, with one intentional difference: this file uses Codex `skills/` instead of Claude subagents.
+> This file should stay aligned with `../Claude/CLAUDE.md`; only platform-specific
+> skill and agent locations should differ.
 
 This file mirrors the macro development rules for Codex CLI usage (open-source agentic coding interface; not the legacy OpenAI Codex model).
 
@@ -221,30 +222,34 @@ The exact format can be adapted per project, but every eval entry must at minimu
 
 ---
 
-## Skills
+## Skills and Agents
 
-Use reusable Codex skills (stored under `skills/`) for targeted work and portability across projects.
+Skills under `.agents/skills/` contain the reusable workflow. Custom agents
+under `.codex/agents/` provide isolated context and permissions for work that
+benefits from delegation. Use a skill in the current conversation for a
+repeatable method; use its agent adapter for independent criticism, noisy
+output, parallel work, or a constrained tool surface.
 
-| Skill | When to use |
-|-------|-------------|
-| `architecture-reviewer` | **Before** implementing significant changes — validates design, evaluates trade-offs, catches structural issues early |
-| `senior-code-reviewer` | **After** completing a feature or logical chunk of code — reviews for bugs, security, performance, and maintainability |
-| `red-team-analyst` | For adversarial security review of auth, permissions, payments, uploads, APIs, and other high-risk attack surfaces |
-| `senior-qa-engineer` | When you need test coverage analysis, test case design, TDD workflows, or flaky test debugging |
-| `validate-feature-candidate` | **After** a feature candidate is frozen at an immutable revision — independently runs approved checks without modifying the candidate and returns an evidence-backed pass, fail, or error result |
-| `code-simplification-architect` | When code works but is messy — simplifies nested logic, breaks down god classes, eliminates duplication |
-| `github-actions-engineer` | For creating, debugging, or optimizing GitHub Actions workflows and CI/CD pipelines |
-| `devops-engineer` | When designing infrastructure and delivery beyond GitHub Actions — IaC, cloud provisioning, containers/Kubernetes, environments, and observability |
-| `mobile-engineer` | When building mobile features or fixing platform issues — handles UI flows, lifecycle, offline behavior, performance, and device-specific bugs |
-| `app-localization` | When adding, auditing, or validating app localization, translated copy, string catalogs, and locale coverage |
+| Skill | Agent adapter | When to use |
+|-------|---------------|-------------|
+| `architecture-reviewer` | `architecture-reviewer` | Validate significant designs before implementation |
+| `senior-code-reviewer` | `senior-code-reviewer` | Review completed changes without modifying them |
+| `red-team-analyst` | `red-team-analyst` | Adversarially review high-risk attack surfaces |
+| `senior-qa-engineer` | `senior-qa-engineer` | Design or implement tests and diagnose flaky checks |
+| `validate-feature-candidate` | `independent-validator` | Validate an immutable candidate through a fresh agent |
+| `code-simplification-architect` | `code-simplification-architect` | Simplify working code without behavior changes |
+| `github-actions-engineer` | `github-actions-engineer` | Build, debug, or harden GitHub Actions |
+| `devops-engineer` | — | Design infrastructure, delivery, and observability |
+| `mobile-engineer` | — | Handle mobile lifecycle, performance, and platform behavior |
+| `app-localization` | — | Add or audit localization and translated resources |
 
 ### Usage pattern
 
-1. **Plan** — apply `skills/architecture-reviewer` to validate the approach
+1. **Plan** — use the `architecture-reviewer` agent for significant designs
 2. **Implement** — write the code
-3. **Review** — apply `skills/senior-code-reviewer` to catch issues
-4. **Attack** — apply `skills/red-team-analyst` for security-sensitive changes
-5. **Localize** — apply `skills/app-localization` when adding or auditing translated app copy
-6. **Test** — apply `skills/senior-qa-engineer` to ensure coverage
-7. **Simplify** — apply `skills/code-simplification-architect` if the result is complex
-8. **Validate** — freeze the candidate at an immutable revision, then apply `skills/validate-feature-candidate` for evidence-backed validation
+3. **Review** — delegate to `senior-code-reviewer`
+4. **Attack** — delegate to `red-team-analyst` for security-sensitive changes
+5. **Test** — use `senior-qa-engineer` when QA work benefits from isolation
+6. **Simplify** — apply the simplification skill or agent if complexity remains
+7. **Validate** — freeze the candidate, then spawn a fresh
+   `independent-validator`; a skill invoked by the implementer is not independent

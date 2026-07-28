@@ -19,6 +19,29 @@ const PROFILE_DEFINITIONS = {
   }
 };
 
+const SKILL_NAMES = [
+  "app-localization",
+  "architecture-reviewer",
+  "code-simplification-architect",
+  "devops-engineer",
+  "github-actions-engineer",
+  "mobile-engineer",
+  "red-team-analyst",
+  "senior-code-reviewer",
+  "senior-qa-engineer",
+  "validate-feature-candidate"
+];
+
+const AGENT_NAMES = [
+  "architecture-reviewer",
+  "code-simplification-architect",
+  "github-actions-engineer",
+  "independent-validator",
+  "red-team-analyst",
+  "senior-code-reviewer",
+  "senior-qa-engineer"
+];
+
 function repoRoot() {
   return path.resolve(__dirname, "..");
 }
@@ -171,6 +194,80 @@ async function filesMatch(sourcePath, destinationPath) {
   }
 }
 
+async function readText(filePath) {
+  try {
+    return await fs.readFile(filePath, "utf8");
+  } catch {
+    return null;
+  }
+}
+
+function frontmatterValue(content, key) {
+  if (!content || !content.startsWith("---\n")) {
+    return null;
+  }
+  const end = content.indexOf("\n---\n", 4);
+  if (end === -1) {
+    return null;
+  }
+  const frontmatter = content.slice(4, end);
+  const match = frontmatter.match(new RegExp(`^${key}:\\s*(.+)$`, "m"));
+  return match ? match[1].trim().replace(/^["']|["']$/g, "") : null;
+}
+
+async function validSkill(filePath, expectedName) {
+  const content = await readText(filePath);
+  const name = frontmatterValue(content, "name");
+  const description = frontmatterValue(content, "description");
+  return (
+    name === expectedName &&
+    /^[a-z0-9-]+$/.test(name) &&
+    Boolean(description) &&
+    description.length <= 1024
+  );
+}
+
+async function validClaudeAgent(filePath, expectedName) {
+  const content = await readText(filePath);
+  return (
+    frontmatterValue(content, "name") === expectedName &&
+    Boolean(frontmatterValue(content, "description")) &&
+    !/^model:/m.test(content || "") &&
+    /^skills:\s*$/m.test(content || "")
+  );
+}
+
+async function validCodexAgent(filePath, expectedName) {
+  const content = await readText(filePath);
+  if (!content) {
+    return false;
+  }
+  const nameMatch = content.match(/^name\s*=\s*"([^"]+)"$/m);
+  return (
+    nameMatch?.[1] === expectedName &&
+    /^description\s*=\s*"[^"]+"$/m.test(content) &&
+    /^developer_instructions\s*=\s*"""/m.test(content) &&
+    !/^model\s*=/m.test(content)
+  );
+}
+
+async function validManifest(filePath) {
+  const content = await readText(filePath);
+  try {
+    const manifest = JSON.parse(content);
+    return (
+      manifest.tool === "ai-playbook" &&
+      manifest.layoutVersion === 2 &&
+      Array.isArray(manifest.managedPaths) &&
+      manifest.capabilities &&
+      Array.isArray(manifest.capabilities.skills) &&
+      Array.isArray(manifest.capabilities.agents)
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function copyFileSafe(sourcePath, destinationPath, options, result) {
   const alreadyExists = await exists(destinationPath);
   if (alreadyExists && !options.force) {
@@ -206,6 +303,37 @@ async function ensureManifest(target, payload, options) {
   return manifestPath;
 }
 
+async function existingManagedPaths(target) {
+  const manifestPath = path.join(target, ".ai-playbook-manifest.json");
+  const content = await readText(manifestPath);
+  try {
+    const manifest = JSON.parse(content);
+    return Array.isArray(manifest.managedPaths) ? manifest.managedPaths : [];
+  } catch {
+    return [];
+  }
+}
+
+function relativeManagedPaths(target, result, previousPaths) {
+  const copiedPaths = result.copied.map((filePath) => path.relative(target, filePath));
+  return [...new Set([...previousPaths, ...copiedPaths])]
+    .sort();
+}
+
+function capabilityPaths(agentMode) {
+  const skills = [];
+  const agents = [];
+  if (agentMode === "codex" || agentMode === "both") {
+    skills.push(...SKILL_NAMES.map((name) => path.join(".agents", "skills", name)));
+    agents.push(...AGENT_NAMES.map((name) => path.join(".codex", "agents", `${name}.toml`)));
+  }
+  if (agentMode === "claude" || agentMode === "both") {
+    skills.push(...SKILL_NAMES.map((name) => path.join(".claude", "skills", name)));
+    agents.push(...AGENT_NAMES.map((name) => path.join(".claude", "agents", `${name}.md`)));
+  }
+  return { skills, agents };
+}
+
 async function installInit(args, io) {
   const target = path.resolve(args.target);
   const { files, packageJson } = await collectProjectSignals(target);
@@ -214,6 +342,9 @@ async function installInit(args, io) {
   const selectedProfiles = profiles.length > 0 ? profiles : ["frontend-react"];
   const root = repoRoot();
   const result = { copied: [], skipped: [] };
+  const previousManagedPaths = await existingManagedPaths(target);
+  const legacyCodexSkills = path.join(target, "Codex", "skills");
+  const hadLegacyCodexSkills = await exists(legacyCodexSkills);
 
   await copyFileSafe(
     path.join(root, "templates", "common", "features.md"),
@@ -249,8 +380,14 @@ async function installInit(args, io) {
   if (args.agent === "codex" || args.agent === "both") {
     await copyFileSafe(path.join(root, "Codex", "AGENTS.md"), path.join(target, "AGENTS.md"), args, result);
     await copyDirectorySafe(
-      path.join(root, "Codex", "skills"),
-      path.join(target, "Codex", "skills"),
+      path.join(root, ".agents", "skills"),
+      path.join(target, ".agents", "skills"),
+      args,
+      result
+    );
+    await copyDirectorySafe(
+      path.join(root, "Codex", "agents"),
+      path.join(target, ".codex", "agents"),
       args,
       result
     );
@@ -259,6 +396,18 @@ async function installInit(args, io) {
     await copyFileSafe(
       path.join(root, "Claude", "CLAUDE.md"),
       path.join(target, "CLAUDE.md"),
+      args,
+      result
+    );
+    await copyDirectorySafe(
+      path.join(root, ".agents", "skills"),
+      path.join(target, ".claude", "skills"),
+      args,
+      result
+    );
+    await copyDirectorySafe(
+      path.join(root, "Claude", "agents"),
+      path.join(target, ".claude", "agents"),
       args,
       result
     );
@@ -280,9 +429,12 @@ async function installInit(args, io) {
     {
       tool: "ai-playbook",
       version: toolVersion,
+      layoutVersion: 2,
       installedAt: new Date().toISOString(),
       agent: args.agent,
-      profiles: selectedProfiles
+      profiles: selectedProfiles,
+      capabilities: capabilityPaths(args.agent),
+      managedPaths: relativeManagedPaths(target, result, previousManagedPaths)
     },
     args
   );
@@ -298,8 +450,43 @@ async function installInit(args, io) {
       io.stdout.write(`  - ${filePath}\n`);
     }
   }
+  if (
+    hadLegacyCodexSkills &&
+    (args.agent === "codex" || args.agent === "both")
+  ) {
+    io.stdout.write(
+      "Legacy Codex/skills retained; native copies were installed under .agents/skills.\n"
+    );
+  }
   io.stdout.write(`${args.dryRun ? "Would write" : "Wrote"} manifest: ${manifestPath}\n`);
   return 0;
+}
+
+function skillChecks(root, target, destinationRoot) {
+  return SKILL_NAMES.map((name) => ({
+    name: path.join(destinationRoot, name, "SKILL.md"),
+    path: path.join(target, destinationRoot, name, "SKILL.md"),
+    sourcePath: path.join(root, ".agents", "skills", name, "SKILL.md"),
+    validate: (filePath) => validSkill(filePath, name)
+  }));
+}
+
+function codexAgentChecks(root, target) {
+  return AGENT_NAMES.map((name) => ({
+    name: path.join(".codex", "agents", `${name}.toml`),
+    path: path.join(target, ".codex", "agents", `${name}.toml`),
+    sourcePath: path.join(root, "Codex", "agents", `${name}.toml`),
+    validate: (filePath) => validCodexAgent(filePath, name)
+  }));
+}
+
+function claudeAgentChecks(root, target) {
+  return AGENT_NAMES.map((name) => ({
+    name: path.join(".claude", "agents", `${name}.md`),
+    path: path.join(target, ".claude", "agents", `${name}.md`),
+    sourcePath: path.join(root, "Claude", "agents", `${name}.md`),
+    validate: (filePath) => validClaudeAgent(filePath, name)
+  }));
 }
 
 async function runDoctor(args, io) {
@@ -308,7 +495,11 @@ async function runDoctor(args, io) {
   const checks = [
     { name: "features.md", path: path.join(target, "features.md") },
     { name: "evals.md", path: path.join(target, "evals.md") },
-    { name: ".ai-playbook-manifest.json", path: path.join(target, ".ai-playbook-manifest.json") },
+    {
+      name: ".ai-playbook-manifest.json",
+      path: path.join(target, ".ai-playbook-manifest.json"),
+      validate: validManifest
+    },
     {
       name: "independent-validator/v1/assignment.schema.json",
       path: path.join(
@@ -359,26 +550,13 @@ async function runDoctor(args, io) {
   ];
   const codexChecks = [
     { name: "AGENTS.md", path: path.join(target, "AGENTS.md") },
-    {
-      name: "Codex/skills/validate-feature-candidate/SKILL.md",
-      path: path.join(
-        target,
-        "Codex",
-        "skills",
-        "validate-feature-candidate",
-        "SKILL.md"
-      ),
-      sourcePath: path.join(
-        root,
-        "Codex",
-        "skills",
-        "validate-feature-candidate",
-        "SKILL.md"
-      )
-    }
+    ...skillChecks(root, target, path.join(".agents", "skills")),
+    ...codexAgentChecks(root, target)
   ];
   const claudeChecks = [
-    { name: "CLAUDE.md", path: path.join(target, "CLAUDE.md") }
+    { name: "CLAUDE.md", path: path.join(target, "CLAUDE.md") },
+    ...skillChecks(root, target, path.join(".claude", "skills")),
+    ...claudeAgentChecks(root, target)
   ];
   const agentChecks = {
     codex: codexChecks,
@@ -388,9 +566,24 @@ async function runDoctor(args, io) {
   checks.push(...agentChecks[args.agent]);
 
   let failures = 0;
+  const legacyPath = path.join(target, "Codex", "skills");
+  const nativeCodexPath = path.join(target, ".agents", "skills");
+  if (
+    (args.agent === "codex" || args.agent === "both") &&
+    (await exists(legacyPath)) &&
+    !(await exists(nativeCodexPath))
+  ) {
+    io.stdout.write(
+      "WARN legacy Codex/skills found without .agents/skills; rerun init to migrate.\n"
+    );
+  }
   for (const check of checks) {
     const present = await exists(check.path);
-    const matches = present && (!check.sourcePath || (await filesMatch(check.sourcePath, check.path)));
+    const sourceMatches =
+      present && (!check.sourcePath || (await filesMatch(check.sourcePath, check.path)));
+    const metadataMatches =
+      sourceMatches && (!check.validate || (await check.validate(check.path)));
+    const matches = sourceMatches && metadataMatches;
     const status = !present ? "MISS" : matches ? "OK  " : "BAD ";
     io.stdout.write(`${status} ${check.name}\n`);
     if (!matches) {

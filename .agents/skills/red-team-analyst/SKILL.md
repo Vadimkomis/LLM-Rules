@@ -7,6 +7,12 @@ description: Perform adversarial security analysis after implementation. Use for
 
 Run an attacker-minded review focused on exploitability and business impact.
 
+## Inputs
+
+Use the exact review target, trust boundaries, expected authorization rules,
+relevant diff, and reachable entry points. Treat unverified environmental
+assumptions as hypotheses.
+
 ## Workflow
 
 1. Define target and trust boundaries.
@@ -14,6 +20,9 @@ Run an attacker-minded review focused on exploitability and business impact.
 3. Identify concrete exploit paths, including multi-step attack chains.
 4. Prioritize findings by real-world exploitability and impact.
 5. Provide specific remediations and hardening actions.
+
+Stay read-only unless the user separately requests remediation. Do not claim an
+exploit is verified without a reachable code path or reproduction evidence.
 
 ## Focus Areas
 
