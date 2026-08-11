@@ -450,7 +450,6 @@ git commit -m "feat: distribute performance benchmarking skill"
 ### Task 3: Usage documentation, feature contract, and eval mapping
 
 **Files:**
-- Modify: `tests/capabilities.test.js`
 - Modify: `README.md`
 - Modify: `features.md`
 - Modify: `evals.md`
@@ -459,36 +458,7 @@ git commit -m "feat: distribute performance benchmarking skill"
 - Consumes: installed skill name and CLI behavior from Tasks 1 and 2.
 - Produces: discoverable usage instructions and stable feature/eval documentation.
 
-- [ ] **Step 1: Add a failing documentation contract**
-
-Add this test to `tests/capabilities.test.js`:
-
-```js
-test("performance benchmarking usage is documented", async () => {
-  const [readme, features, evals] = await Promise.all([
-    fs.readFile(path.join(ROOT, "README.md"), "utf8"),
-    fs.readFile(path.join(ROOT, "features.md"), "utf8"),
-    fs.readFile(path.join(ROOT, "evals.md"), "utf8")
-  ]);
-
-  assert.match(readme, /\$performance-benchmarking/);
-  assert.match(readme, /codex exec --sandbox workspace-write/);
-  assert.match(features, /Performance Benchmarking Skill/);
-  assert.match(evals, /Cross-stack performance benchmarking/);
-});
-```
-
-- [ ] **Step 2: Run the documentation contract and verify the red state**
-
-Run:
-
-```bash
-node --test tests/capabilities.test.js
-```
-
-Expected: FAIL because the README, features, and evals do not mention the new skill.
-
-- [ ] **Step 3: Document installation and invocation**
+- [ ] **Step 1: Document installation and invocation**
 
 Update the README canonical skill summary and skill table with
 `performance-benchmarking`. Add a short CLI example using these exact commands:
@@ -513,7 +483,7 @@ Explain that Codex discovers the repository skill under `.agents/skills/`, that
 plain-language matching is also supported, and that single quotes prevent shell
 expansion of `$performance-benchmarking` in non-interactive mode.
 
-- [ ] **Step 4: Add feature and eval contracts**
+- [ ] **Step 2: Add feature and eval contracts**
 
 Add this scenario to `features.md`:
 
@@ -535,12 +505,15 @@ Add this eval to `evals.md`:
 - Notes: Installation checks cover Codex and Claude reference files; content checks cover fallback, approval, and inconclusive-result semantics.
 ```
 
-- [ ] **Step 5: Run tests and commit documentation**
+- [ ] **Step 3: Review prose, run tests, and commit documentation**
+
+Review the three documents directly. Human-facing prose does not receive a
+brittle source-text test; executable discovery, installation, and integrity
+behavior is already covered by Tasks 1 and 2.
 
 Run:
 
 ```bash
-node --test tests/capabilities.test.js
 npm test
 ```
 
@@ -549,7 +522,7 @@ Expected: both commands PASS.
 Commit:
 
 ```bash
-git add README.md features.md evals.md tests/capabilities.test.js
+git add README.md features.md evals.md docs/superpowers/plans/2026-08-11-performance-benchmarking-skill.md
 git commit -m "docs: explain performance benchmarking workflow"
 ```
 

@@ -30,7 +30,8 @@ templates/
 
 The canonical skill collection includes architecture review, code review, QA,
 independent candidate validation, red-team analysis, simplification, GitHub
-Actions, DevOps, mobile engineering, and app localization.
+Actions, DevOps, mobile engineering, app localization, and cross-stack
+performance benchmarking.
 
 ## Quick Start
 
@@ -98,6 +99,34 @@ restricted permissions.
 | `devops-engineer` | — | Infrastructure and delivery |
 | `mobile-engineer` | — | Mobile platform work |
 | `app-localization` | — | Localization and translation resources |
+| `performance-benchmarking` | — | Measured baselines and verified optimization |
+
+### Performance benchmarking from Codex CLI
+
+After installing the playbook, launch Codex from the target repository and
+select the skill with `/skills` or invoke it directly:
+
+```bash
+npx @vadim/ai-playbook init --agent codex
+codex
+```
+
+```text
+$performance-benchmarking Benchmark the parser, establish a baseline, and ask before optimizing production code.
+```
+
+Codex discovers the repository copy under `.agents/skills/`. It can also invoke
+the skill implicitly when a request matches its description.
+
+For non-interactive use, grant workspace writes when the run should create
+benchmark files:
+
+```bash
+codex exec --sandbox workspace-write \
+  '$performance-benchmarking Benchmark the image pipeline and record the baseline.'
+```
+
+The single quotes prevent the shell from expanding `$performance-benchmarking`.
 
 Reviewer agents are non-editing. QA, simplification, and GitHub Actions agents
 may edit the workspace when implementation is requested.
@@ -113,8 +142,9 @@ the method but does not create independence.
 3. Delegate code review to `senior-code-reviewer`.
 4. Use `red-team-analyst` for security-sensitive changes.
 5. Use `senior-qa-engineer` for test gaps or flaky checks.
-6. Simplify when complexity remains.
-7. Freeze the candidate and use a fresh `independent-validator`.
+6. Use `performance-benchmarking` for performance-sensitive paths.
+7. Simplify when complexity remains.
+8. Freeze the candidate and use a fresh `independent-validator`.
 
 ## Doctor and Legacy Migration
 

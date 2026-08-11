@@ -25,6 +25,11 @@ Test runners and CI are the authoritative source for pass/fail results.
 - Test mapping: `tests/capabilities.test.js`
 - Notes: Independent validation has a separate fresh-agent boundary check.
 
+- Name: Cross-stack performance benchmarking
+- Description: The performance benchmarking skill routes known and unknown stacks, rejects incomparable evidence, approval-gates production and reusable-skill edits, and persists project-local learning.
+- Test mapping: `tests/capabilities.test.js`; `tests/cli.test.js`; `tests/fixtures/skill-activation.json`
+- Notes: Installation checks cover Codex and Claude reference files; deterministic content contracts cover fallback, approval, and inconclusive-result semantics. Hosted-agent pressure testing requires separately authorized delegation.
+
 ## Independent validation
 
 - Name: Contract-valid candidate outcomes

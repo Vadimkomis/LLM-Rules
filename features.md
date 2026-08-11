@@ -124,6 +124,15 @@ Feature: Codex integration
     Then string extraction, translation resources, placeholders, plurals, and layout validation are handled
     And the status is "completed"
 
+Feature: Cross-stack performance benchmarking
+
+  Scenario: Performance Benchmarking Skill
+    Given code performance needs to be measured or improved in a known or unfamiliar stack
+    When the performance benchmarking skill is used
+    Then it creates a trustworthy baseline, approval-gates production optimization, verifies comparable results, and preserves project learning
+    And reusable skill changes require separate explicit approval
+    And the status is "completed"
+
 Feature: Independent feature validation
 
   Scenario: Tool-neutral versioned contracts and outcome semantics
