@@ -113,6 +113,17 @@ cost estimate to identify likely dominant work before reaching for local code
 tweaks. It distinguishes initialization, hot-path, batch, interactive, and
 library behavior.
 
+The methodology reference includes the rough operation-cost table from
+Abseil's Performance Hints beside its canonical source link. The table is an
+offline order-of-magnitude aid for ranking likely costs and forming hypotheses;
+it is never a benchmark result, baseline, performance budget, or SLO. The skill
+must identify the values as illustrative and hardware-dependent, encourage a
+project-specific cost model where useful, and require measurement on the target
+runtime, device, workload, and environment before making an optimization claim.
+Keeping the table in `references/methodology.md` preserves the compact core
+skill while making the estimation guidance available when that reference is
+loaded.
+
 ### 3. Resolve the benchmark tooling
 
 The resolution order is:
@@ -344,6 +355,8 @@ Automated tests will verify that:
 - the skill includes an unknown-stack fallback;
 - production edits and skill self-edits are approval-gated;
 - project learning and inconclusive-result behavior are explicit;
+- the Abseil rough-cost table retains its source and cannot be presented as a
+  measured baseline or universal target;
 - installation remains preservation-safe.
 
 Because implementation changes JavaScript files, `npm test` must pass after the
@@ -357,6 +370,8 @@ changes.
   contract mid-comparison.
 - It never claims an improvement from incomparable or inconclusive evidence.
 - Production optimization requires approval after the baseline is available.
+- Rough operation costs are available for estimation but never substitute for
+  target-environment measurements.
 - Project-specific benchmark knowledge persists across invocations.
 - Reusable-skill edits require separate explicit approval and validation.
 - Installation and doctor flows include the complete skill for both supported
