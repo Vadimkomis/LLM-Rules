@@ -26,11 +26,21 @@ const SKILL_NAMES = [
   "devops-engineer",
   "github-actions-engineer",
   "mobile-engineer",
+  "performance-benchmarking",
   "red-team-analyst",
   "senior-code-reviewer",
   "senior-qa-engineer",
   "validate-feature-candidate"
 ];
+
+const SKILL_REFERENCE_FILES = {
+  "performance-benchmarking": [
+    "continuous-improvement.md",
+    "methodology.md",
+    "report-contract.md",
+    "stack-recipes.md"
+  ]
+};
 
 const AGENT_NAMES = [
   "architecture-reviewer",
@@ -463,12 +473,24 @@ async function installInit(args, io) {
 }
 
 function skillChecks(root, target, destinationRoot) {
-  return SKILL_NAMES.map((name) => ({
-    name: path.join(destinationRoot, name, "SKILL.md"),
-    path: path.join(target, destinationRoot, name, "SKILL.md"),
-    sourcePath: path.join(root, ".agents", "skills", name, "SKILL.md"),
-    validate: (filePath) => validSkill(filePath, name)
-  }));
+  return SKILL_NAMES.flatMap((name) => {
+    const files = [
+      "SKILL.md",
+      ...(SKILL_REFERENCE_FILES[name] || []).map((reference) =>
+        path.join("references", reference)
+      )
+    ];
+
+    return files.map((relativePath) => ({
+      name: path.join(destinationRoot, name, relativePath),
+      path: path.join(target, destinationRoot, name, relativePath),
+      sourcePath: path.join(root, ".agents", "skills", name, relativePath),
+      validate:
+        relativePath === "SKILL.md"
+          ? (filePath) => validSkill(filePath, name)
+          : undefined
+    }));
+  });
 }
 
 function codexAgentChecks(root, target) {

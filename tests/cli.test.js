@@ -12,6 +12,7 @@ const SKILL_NAMES = [
   "devops-engineer",
   "github-actions-engineer",
   "mobile-engineer",
+  "performance-benchmarking",
   "red-team-analyst",
   "senior-code-reviewer",
   "senior-qa-engineer",
@@ -26,6 +27,13 @@ const AGENT_NAMES = [
   "red-team-analyst",
   "senior-code-reviewer",
   "senior-qa-engineer"
+];
+
+const PERFORMANCE_BENCHMARKING_REFERENCES = [
+  "continuous-improvement.md",
+  "methodology.md",
+  "report-contract.md",
+  "stack-recipes.md"
 ];
 
 function captureIo() {
@@ -108,6 +116,28 @@ test("init --agent both installs native skills, agents, and validator contracts"
     await assertExists(target, path.join(".agents", "skills", skill, "SKILL.md"));
     await assertExists(target, path.join(".claude", "skills", skill, "SKILL.md"));
   }
+  for (const reference of PERFORMANCE_BENCHMARKING_REFERENCES) {
+    await assertExists(
+      target,
+      path.join(
+        ".agents",
+        "skills",
+        "performance-benchmarking",
+        "references",
+        reference
+      )
+    );
+    await assertExists(
+      target,
+      path.join(
+        ".claude",
+        "skills",
+        "performance-benchmarking",
+        "references",
+        reference
+      )
+    );
+  }
   for (const agent of AGENT_NAMES) {
     await assertExists(target, path.join(".codex", "agents", `${agent}.toml`));
     await assertExists(target, path.join(".claude", "agents", `${agent}.md`));
@@ -137,6 +167,14 @@ test("init --agent both installs native skills, agents, and validator contracts"
 
   assert.match(doctorCapture.output.stdout, /OK\s+\.agents\/skills\/app-localization/);
   assert.match(doctorCapture.output.stdout, /OK\s+\.claude\/skills\/app-localization/);
+  assert.match(
+    doctorCapture.output.stdout,
+    /OK\s+\.agents\/skills\/performance-benchmarking\/references\/methodology\.md/
+  );
+  assert.match(
+    doctorCapture.output.stdout,
+    /OK\s+\.claude\/skills\/performance-benchmarking\/references\/methodology\.md/
+  );
   assert.match(doctorCapture.output.stdout, /OK\s+\.codex\/agents\/independent-validator/);
   assert.match(doctorCapture.output.stdout, /OK\s+\.claude\/agents\/independent-validator/);
 });
@@ -314,5 +352,35 @@ test("doctor rejects a corrupted installed validator schema", async (t) => {
   assert.match(
     doctorCapture.output.stdout,
     /BAD\s+independent-validator\/v1\/result\.schema\.json/
+  );
+});
+
+test("doctor rejects a corrupted installed skill reference", async (t) => {
+  const target = await temporaryTarget(t, "ai-playbook-skill-reference-bad-");
+  assert.equal(
+    await run(["init", "--agent", "codex", "--target", target], captureIo().io),
+    0
+  );
+  await fs.writeFile(
+    path.join(
+      target,
+      ".agents",
+      "skills",
+      "performance-benchmarking",
+      "references",
+      "methodology.md"
+    ),
+    "corrupted\n",
+    "utf8"
+  );
+
+  const doctorCapture = captureIo();
+  assert.equal(
+    await run(["doctor", "--agent", "codex", "--target", target], doctorCapture.io),
+    1
+  );
+  assert.match(
+    doctorCapture.output.stdout,
+    /BAD\s+\.agents\/skills\/performance-benchmarking\/references\/methodology\.md/
   );
 });
