@@ -35,6 +35,12 @@
     "incomplete": "Fix the app screen.",
     "negative": "Optimize a backend SQL query."
   },
+  "performance-benchmarking": {
+    "direct": "Use performance-benchmarking to baseline and optimize this Rust parser with before-and-after evidence.",
+    "indirect": "Create a representative benchmark for this hot path, profile it, and prove whether the proposed optimization helps.",
+    "incomplete": "Make this code faster and measure it.",
+    "negative": "Refactor these variable names without changing or measuring performance."
+  },
   "red-team-analyst": {
     "direct": "Use red-team-analyst to attack this authorization flow.",
     "indirect": "Try to find privilege escalation and business-logic abuse in checkout.",

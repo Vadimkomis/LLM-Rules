@@ -15,6 +15,7 @@ const SKILL_NAMES = [
   "devops-engineer",
   "github-actions-engineer",
   "mobile-engineer",
+  "performance-benchmarking",
   "red-team-analyst",
   "senior-code-reviewer",
   "senior-qa-engineer",
@@ -70,6 +71,40 @@ test("canonical skills have valid unique metadata and activation fixtures", asyn
       assert.ok(prompt.length >= 10);
     }
   }
+});
+
+test("performance benchmarking skill ships its guarded adaptive workflow", async () => {
+  const skillRoot = path.join(SKILLS_ROOT, "performance-benchmarking");
+  const skill = await fs.readFile(path.join(skillRoot, "SKILL.md"), "utf8");
+  const referenceRoot = path.join(skillRoot, "references");
+
+  assert.match(metadataValue(skill, "description"), /^Use when /);
+  assert.deepEqual((await fs.readdir(referenceRoot)).sort(), [
+    "continuous-improvement.md",
+    "methodology.md",
+    "report-contract.md",
+    "stack-recipes.md"
+  ]);
+  assert.match(skill, /approval before modifying production code/i);
+  assert.match(skill, /known or unknown stack/i);
+  assert.match(skill, /inconclusive/i);
+
+  const [continuousImprovement, methodology, reportContract, stackRecipes] =
+    await Promise.all(
+      [
+        "continuous-improvement.md",
+        "methodology.md",
+        "report-contract.md",
+        "stack-recipes.md"
+      ].map((name) => fs.readFile(path.join(referenceRoot, name), "utf8"))
+    );
+
+  assert.match(continuousImprovement, /project-local lane/i);
+  assert.match(continuousImprovement, /explicit approval/i);
+  assert.match(continuousImprovement, /does not run.*background/is);
+  assert.match(methodology, /rationalization check/i);
+  assert.match(reportContract, /accepted.*rejected.*inconclusive.*blocked/is);
+  assert.match(stackRecipes, /unknown or unlisted stack/i);
 });
 
 test("Claude agents are thin skill adapters without pinned models", async () => {
