@@ -103,6 +103,32 @@ test("performance benchmarking skill ships its guarded adaptive workflow", async
   assert.match(continuousImprovement, /explicit approval/i);
   assert.match(continuousImprovement, /does not run.*background/is);
   assert.match(methodology, /rationalization check/i);
+  const roughCosts = [
+    ["L1 cache reference", "0.5 ns"],
+    ["L2 cache reference", "3 ns"],
+    ["Branch mispredict", "5 ns"],
+    ["Mutex lock/unlock (uncontended)", "15 ns"],
+    ["Main memory reference", "50 ns"],
+    ["Compress 1K bytes with Snappy", "1,000 ns"],
+    ["Read 4KB from SSD", "20,000 ns"],
+    ["Round trip within same datacenter", "50,000 ns"],
+    ["Read 1MB sequentially from memory", "64,000 ns"],
+    ["Read 1MB over 100 Gbps network", "100,000 ns"],
+    ["Read 1MB from SSD", "1,000,000 ns"],
+    ["Disk seek", "5,000,000 ns"],
+    ["Read 1MB sequentially from disk", "10,000,000 ns"],
+    ["Send packet CA->Netherlands->CA", "150,000,000 ns"]
+  ];
+  for (const [operation, cost] of roughCosts) {
+    assert.ok(methodology.includes(`| ${operation} | ${cost} |`));
+  }
+  assert.match(methodology, /https:\/\/abseil\.io\/fast\/hints\.html/);
+  assert.match(methodology, /illustrative.*rough.*hardware-dependent/is);
+  assert.match(methodology, /not.*baseline.*performance budget.*SLO.*acceptance threshold/is);
+  assert.match(
+    methodology,
+    /target\s+runtime.*device.*workload.*environment.*optimization claim/is
+  );
   assert.match(reportContract, /accepted.*rejected.*inconclusive.*blocked/is);
   assert.match(stackRecipes, /unknown or unlisted stack/i);
 });

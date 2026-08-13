@@ -31,7 +31,7 @@
 - Consumes: the existing `methodology` string loaded by `performance benchmarking skill ships its guarded adaptive workflow`
 - Produces: a Markdown table whose rows use the exact shape `| <operation> | <cost> |`, with source and usage safeguards validated by the capability test
 
-- [ ] **Step 1: Add the failing reference-contract assertions**
+- [x] **Step 1: Add the failing reference-contract assertions**
 
 Add these assertions after the existing methodology rationalization assertion in `tests/capabilities.test.js`:
 
@@ -60,11 +60,11 @@ Add these assertions after the existing methodology rationalization assertion in
   assert.match(methodology, /not.*baseline.*performance budget.*SLO.*acceptance threshold/is);
   assert.match(
     methodology,
-    /target runtime.*device.*workload.*environment.*optimization claim/is
+    /target\s+runtime.*device.*workload.*environment.*optimization claim/is
   );
 ```
 
-- [ ] **Step 2: Run the focused test and verify the RED phase**
+- [x] **Step 2: Run the focused test and verify the RED phase**
 
 Run:
 
@@ -74,7 +74,7 @@ node --test --test-name-pattern="performance benchmarking skill" tests/capabilit
 
 Expected: FAIL at the first `roughCosts` assertion because the table has not been added.
 
-- [ ] **Step 3: Add the minimal sourced reference**
+- [x] **Step 3: Add the minimal sourced reference**
 
 Insert a `### Rough Operation-Cost Reference` section after `## 2. Inspect Before Measuring` and before `## 3. Build a Trustworthy Baseline` in `methodology.md`. Include:
 
@@ -110,7 +110,7 @@ Where higher-level operations dominate, build a current project-specific cost
 model from representative measurements.
 ```
 
-- [ ] **Step 4: Run the focused test and verify the GREEN phase**
+- [x] **Step 4: Run the focused test and verify the GREEN phase**
 
 Run:
 
@@ -120,7 +120,7 @@ node --test --test-name-pattern="performance benchmarking skill" tests/capabilit
 
 Expected: PASS with zero failures.
 
-- [ ] **Step 5: Run the full repository verification**
+- [x] **Step 5: Run the full repository verification**
 
 Run:
 
@@ -131,7 +131,7 @@ git diff --check
 
 Expected: all tests pass and `git diff --check` exits with no output.
 
-- [ ] **Step 6: Verify distribution and commit**
+- [x] **Step 6: Verify distribution and commit**
 
 Run:
 
@@ -145,4 +145,3 @@ Confirm `.agents/skills/performance-benchmarking/references/methodology.md` appe
 git add tests/capabilities.test.js .agents/skills/performance-benchmarking/references/methodology.md docs/superpowers/plans/2026-08-13-performance-cost-reference.md
 git commit -m "docs: add benchmark cost reference"
 ```
-
