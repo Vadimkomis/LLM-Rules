@@ -196,6 +196,21 @@ count, central tendency, dispersion, percentage and absolute delta, and any
 confidence or significance calculation supplied by the framework. It does not
 hide regressions in secondary metrics.
 
+Every percentage uses one signed relative-change convention:
+
+```text
+relative change = (candidate - baseline) / baseline * 100
+```
+
+The sign describes how the metric moved, not whether the candidate is better.
+For a lower-is-better metric, `100 ms -> 80 ms` is `-20%` and is reported as
+“latency decreased 20% (better).” For a higher-is-better metric,
+`1000 -> 1200 requests/s` is `+20%` and is reported as “throughput increased
+20% (better).” Reports always name the metric, movement, magnitude, and whether
+that movement is better or worse; they never use a bare claim such as “20%
+faster.” The report contract labels this field `Relative change` rather than
+`Improvement` and requires the accompanying interpretation.
+
 A microbenchmark improvement must also pass relevant functional tests and, when
 available, a representative macrobenchmark, integration workload, UI metric,
 or production-like profile. Noisy, thermally throttled, cross-machine, or
@@ -357,6 +372,8 @@ Automated tests will verify that:
 - project learning and inconclusive-result behavior are explicit;
 - the Abseil rough-cost table retains its source and cannot be presented as a
   measured baseline or universal target;
+- methodology and report output use the single signed relative-change formula
+  with direction-aware latency and throughput examples;
 - installation remains preservation-safe.
 
 Because implementation changes JavaScript files, `npm test` must pass after the
@@ -369,6 +386,8 @@ changes.
 - It creates comparable baselines and candidates without changing the benchmark
   contract mid-comparison.
 - It never claims an improvement from incomparable or inconclusive evidence.
+- It reports signed relative change with the metric and direction instead of a
+  bare improvement percentage.
 - Production optimization requires approval after the baseline is available.
 - Rough operation costs are available for estimation but never substitute for
   target-environment measurements.
