@@ -32,7 +32,7 @@
 - Consumes: the `methodology` and `reportContract` strings loaded by `performance benchmarking skill ships its guarded adaptive workflow`
 - Produces: one signed relative-change formula plus a report table containing `Relative change` and `Interpretation`
 
-- [ ] **Step 1: Add the failing calculation-and-report contract assertions**
+- [x] **Step 1: Add the failing calculation-and-report contract assertions**
 
 Add these assertions after the existing methodology target-environment assertion in `tests/capabilities.test.js`:
 
@@ -53,13 +53,13 @@ Add these assertions after the existing methodology target-environment assertion
   assert.match(methodology, /never.*20% faster/is);
   assert.match(
     reportContract,
-    /signed relative change.*metric direction.*plain-language interpretation/is
+    /signed\s+relative change.*metric direction.*plain-language interpretation/is
   );
   assert.match(reportContract, /\| Relative change \| Interpretation \|/);
   assert.doesNotMatch(reportContract, /\| Improvement \|/);
 ```
 
-- [ ] **Step 2: Run the focused test and verify the RED phase**
+- [x] **Step 2: Run the focused test and verify the RED phase**
 
 Run:
 
@@ -69,7 +69,7 @@ node --test --test-name-pattern="performance benchmarking skill" tests/capabilit
 
 Expected: FAIL at the relative-change formula assertion because the methodology still contains the direction-dependent formulas.
 
-- [ ] **Step 3: Replace the methodology formulas with one signed convention**
+- [x] **Step 3: Replace the methodology formulas with one signed convention**
 
 Replace the `Compute improvement with the declared direction` paragraph and its two formulas in `methodology.md` with:
 
@@ -90,7 +90,7 @@ Always name the metric, movement, magnitude, and whether the movement is better
 or worse. Never report a bare claim such as “20% faster.”
 ```
 
-- [ ] **Step 4: Align the report contract**
+- [x] **Step 4: Align the report contract**
 
 Replace Result field 7 in `report-contract.md` with:
 
@@ -114,7 +114,7 @@ movement is better or worse. Include secondary regressions even when the primary
 metric improves.
 ```
 
-- [ ] **Step 5: Run the focused test and verify the GREEN phase**
+- [x] **Step 5: Run the focused test and verify the GREEN phase**
 
 Run:
 
@@ -124,7 +124,7 @@ node --test --test-name-pattern="performance benchmarking skill" tests/capabilit
 
 Expected: PASS with zero failures.
 
-- [ ] **Step 6: Run full verification and distribution checks**
+- [x] **Step 6: Run full verification and distribution checks**
 
 Run:
 
@@ -136,10 +136,9 @@ npm pack --dry-run --json
 
 Expected: 40 tests pass, the diff check exits with no output, and both modified reference files appear in the npm package file list.
 
-- [ ] **Step 7: Commit the implementation**
+- [x] **Step 7: Commit the implementation**
 
 ```bash
 git add tests/capabilities.test.js .agents/skills/performance-benchmarking/references/methodology.md .agents/skills/performance-benchmarking/references/report-contract.md docs/superpowers/plans/2026-08-13-signed-relative-benchmark-change.md
 git commit -m "docs: clarify benchmark relative changes"
 ```
-

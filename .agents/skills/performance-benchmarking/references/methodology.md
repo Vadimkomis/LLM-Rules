@@ -126,10 +126,20 @@ framework-provided percentiles, confidence intervals, significance, or relative
 margin of error when available; do not manufacture precision the framework did
 not produce.
 
-Compute improvement with the declared direction:
+Compute one signed relative change for every metric:
 
-- lower is better: `(baseline - candidate) / baseline * 100`;
-- higher is better: `(candidate - baseline) / baseline * 100`.
+`relative change = (candidate - baseline) / baseline * 100`
+
+The sign describes movement from the baseline; interpret it using the declared
+metric direction:
+
+| Metric direction | Example | Relative change | Report |
+|---|---|---:|---|
+| Lower is better | `100 ms -> 80 ms` | `-20%` | Latency decreased 20% (better). |
+| Higher is better | `1000 -> 1200 requests/s` | `+20%` | Throughput increased 20% (better). |
+
+Always name the metric, movement, magnitude, and whether the movement is better
+or worse. Never report a bare claim such as “20% faster.”
 
 Never hide secondary regressions behind the primary percentage. Compare against
 the predeclared SLO or tolerance when one exists. Otherwise describe the effect

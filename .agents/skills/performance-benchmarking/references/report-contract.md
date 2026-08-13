@@ -39,8 +39,9 @@ Report every field:
    secondary resources.
 6. **Profile and hypothesis:** measured bottleneck, expected mechanism, and
    approval status.
-7. **Candidate:** identical-contract statistics, absolute delta, directional
-   percentage improvement, and secondary changes.
+7. **Candidate:** identical-contract statistics, absolute delta, signed
+   relative change, metric direction, plain-language interpretation, and
+   secondary changes.
 8. **Validation:** correctness tests, representative higher-level result, and
    re-profile evidence.
 9. **Limitations:** noise, missing tooling, nonrepresentative environments, and
@@ -63,8 +64,9 @@ still useful when its evidence and lesson are recorded.
 ## Compact Comparison Table
 
 ```text
-Workload | Metric | Baseline | Candidate | Absolute delta | Improvement | Dispersion | Decision
+Workload | Metric (unit; higher/lower is better) | Baseline | Candidate | Absolute delta | Relative change | Interpretation | Dispersion | Decision
 ```
 
-State whether higher or lower is better beside every ambiguous metric. Include
-secondary regressions even when the primary metric improves.
+The interpretation names the metric, movement, magnitude, and whether that
+movement is better or worse. Include secondary regressions even when the primary
+metric improves.

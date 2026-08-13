@@ -129,6 +129,26 @@ test("performance benchmarking skill ships its guarded adaptive workflow", async
     methodology,
     /target\s+runtime.*device.*workload.*environment.*optimization claim/is
   );
+  assert.match(
+    methodology,
+    /relative change\s*=\s*\(candidate - baseline\) \/ baseline \* 100/i
+  );
+  assert.doesNotMatch(methodology, /\(baseline - candidate\) \/ baseline/);
+  assert.match(
+    methodology,
+    /100 ms.*80 ms.*-20%.*latency decreased 20%.*better/is
+  );
+  assert.match(
+    methodology,
+    /1000.*1200 requests\/s.*\+20%.*throughput increased 20%.*better/is
+  );
+  assert.match(methodology, /never.*20% faster/is);
+  assert.match(
+    reportContract,
+    /signed\s+relative change.*metric direction.*plain-language interpretation/is
+  );
+  assert.match(reportContract, /\| Relative change \| Interpretation \|/);
+  assert.doesNotMatch(reportContract, /\| Improvement \|/);
   assert.match(reportContract, /accepted.*rejected.*inconclusive.*blocked/is);
   assert.match(stackRecipes, /unknown or unlisted stack/i);
 });
