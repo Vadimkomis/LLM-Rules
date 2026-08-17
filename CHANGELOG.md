@@ -6,11 +6,18 @@ This project follows Semantic Versioning. The structure below is inspired by Kee
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-17
+
 ### Added
 - Added Codex custom-agent adapters under `Codex/agents/` and native
   platform-agent installation for both Codex and Claude Code.
 - Added activation fixtures and static capability tests for all shared skills
   and agent safety boundaries.
+- Added an adaptive performance-benchmarking skill with cross-stack discovery,
+  measurement methodology, platform recipes, reporting guidance, and a guarded
+  continuous-improvement workflow.
+- Added a cost-reference table, sourced from Abseil's performance guidance, for
+  evaluating the scale of measured latency and throughput changes.
 
 ### Changed
 - Moved canonical skills to `.agents/skills/`, which Codex discovers natively,
@@ -22,6 +29,8 @@ This project follows Semantic Versioning. The structure below is inspired by Kee
   agent, and capability manifest entry.
 - Required independent validation to run through a fresh validator agent when
   independence is attested.
+- Clarified benchmark percentage reporting so positive values consistently mean
+  improvement and negative values consistently mean regression.
 
 ### Deprecated
 - The legacy `Codex/skills/` installation layout. `init` now installs native
