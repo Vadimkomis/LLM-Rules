@@ -37,7 +37,8 @@ installed files, manifests, and runtime behavior do not change.
 
 ## Release Flow
 
-1. Confirm the old scope no longer appears in the repository.
+1. Confirm the old scope no longer appears in package metadata or runnable
+   repository commands. Explanatory design history may still name it.
 2. Run `npm test` and a public `npm publish --dry-run`.
 3. Confirm `@vadimkom/ai-playbook@1.2.0` is not already present.
 4. Publish with public access and npm's interactive two-factor authentication.
