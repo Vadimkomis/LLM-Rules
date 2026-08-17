@@ -1,6 +1,6 @@
 {
   "app-localization": {
-    "direct": "Use app-localization to add French and German resources to this iOS app.",
+    "direct": "Use app-localization to add resources for every requested locale in this app.",
     "indirect": "Audit the UI copy for missing translations and mismatched placeholders.",
     "incomplete": "Localize this app.",
     "negative": "Rename this internal analytics event constant."
