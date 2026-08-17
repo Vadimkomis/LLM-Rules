@@ -1,5 +1,5 @@
 {
-  "name": "@vadim/ai-playbook",
+  "name": "@vadimkom/ai-playbook",
   "version": "1.2.0",
   "description": "CLI to install ai-playbook into any repository",
   "license": "MIT",

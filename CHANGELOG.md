@@ -20,6 +20,8 @@ This project follows Semantic Versioning. The structure below is inspired by Kee
   evaluating the scale of measured latency and throughput changes.
 
 ### Changed
+- Set the public npm package name to `@vadimkom/ai-playbook`, matching the
+  account that owns and publishes the package.
 - Moved canonical skills to `.agents/skills/`, which Codex discovers natively,
   and made the CLI install the same skill sources under `.claude/skills/` for
   Claude Code.

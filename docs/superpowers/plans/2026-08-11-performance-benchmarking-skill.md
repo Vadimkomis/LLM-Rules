@@ -464,7 +464,7 @@ Update the README canonical skill summary and skill table with
 `performance-benchmarking`. Add a short CLI example using these exact commands:
 
 ```bash
-npx @vadim/ai-playbook init --agent codex
+npx @vadimkom/ai-playbook init --agent codex
 codex
 ```
 

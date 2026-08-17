@@ -39,13 +39,13 @@ Install into a target repository:
 
 ```bash
 # Codex
-npx @vadim/ai-playbook init --agent codex
+npx @vadimkom/ai-playbook init --agent codex
 
 # Claude Code
-npx @vadim/ai-playbook init --agent claude
+npx @vadimkom/ai-playbook init --agent claude
 
 # Both
-npx @vadim/ai-playbook init --agent both
+npx @vadimkom/ai-playbook init --agent both
 ```
 
 Native destinations are installed automatically:
@@ -67,9 +67,9 @@ Existing files are preserved unless `--force` is supplied.
 The CLI detects supported stacks or accepts explicit profiles:
 
 ```bash
-npx @vadim/ai-playbook profiles
-npx @vadim/ai-playbook init --profile frontend-react --agent both
-npx @vadim/ai-playbook init --profile mobile-ios --agent codex
+npx @vadimkom/ai-playbook profiles
+npx @vadimkom/ai-playbook init --profile frontend-react --agent both
+npx @vadimkom/ai-playbook init --profile mobile-ios --agent codex
 ```
 
 Available profiles:
@@ -107,7 +107,7 @@ After installing the playbook, launch Codex from the target repository and
 select the skill with `/skills` or invoke it directly:
 
 ```bash
-npx @vadim/ai-playbook init --agent codex
+npx @vadimkom/ai-playbook init --agent codex
 codex
 ```
 
@@ -151,8 +151,8 @@ the method but does not create independence.
 Verify an installation:
 
 ```bash
-npx @vadim/ai-playbook doctor --agent codex
-npx @vadim/ai-playbook doctor --agent both
+npx @vadimkom/ai-playbook doctor --agent codex
+npx @vadimkom/ai-playbook doctor --agent both
 ```
 
 `doctor` checks the layout-v2 manifest, every installed skill and agent,
