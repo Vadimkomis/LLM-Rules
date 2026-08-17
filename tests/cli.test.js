@@ -5,6 +5,37 @@ const os = require("node:os");
 const path = require("node:path");
 const { detectProfilesFromProject, parseArgs, run } = require("../src/cli");
 
+const SKILL_NAMES = [
+  "app-localization",
+  "architecture-reviewer",
+  "code-simplification-architect",
+  "devops-engineer",
+  "github-actions-engineer",
+  "mobile-engineer",
+  "performance-benchmarking",
+  "red-team-analyst",
+  "senior-code-reviewer",
+  "senior-qa-engineer",
+  "validate-feature-candidate"
+];
+
+const AGENT_NAMES = [
+  "architecture-reviewer",
+  "code-simplification-architect",
+  "github-actions-engineer",
+  "independent-validator",
+  "red-team-analyst",
+  "senior-code-reviewer",
+  "senior-qa-engineer"
+];
+
+const PERFORMANCE_BENCHMARKING_REFERENCES = [
+  "continuous-improvement.md",
+  "methodology.md",
+  "report-contract.md",
+  "stack-recipes.md"
+];
+
 function captureIo() {
   const output = { stdout: "", stderr: "" };
   return {
@@ -14,6 +45,23 @@ function captureIo() {
       stderr: { write: (value) => (output.stderr += value) }
     }
   };
+}
+
+async function temporaryTarget(t, prefix) {
+  const target = await fs.mkdtemp(path.join(os.tmpdir(), prefix));
+  t.after(() => fs.rm(target, { recursive: true, force: true }));
+  return target;
+}
+
+async function assertExists(target, relativePath) {
+  await fs.access(path.join(target, relativePath));
+}
+
+async function assertMissing(target, relativePath) {
+  await assert.rejects(
+    fs.access(path.join(target, relativePath)),
+    (error) => error.code === "ENOENT"
+  );
 }
 
 test("parseArgs parses init arguments", () => {
@@ -51,14 +99,8 @@ test("detectProfilesFromProject detects stack signals", () => {
   );
 });
 
-test("init --agent both adds validator contracts without changing agent destinations", async (t) => {
-  const target = await fs.mkdtemp(path.join(os.tmpdir(), "ai-playbook-validator-"));
-  t.after(() => fs.rm(target, { recursive: true, force: true }));
-  await fs.writeFile(
-    path.join(target, "package.json"),
-    JSON.stringify({ type: "module" }),
-    "utf8"
-  );
+test("init --agent both installs native skills, agents, and validator contracts", async (t) => {
+  const target = await temporaryTarget(t, "ai-playbook-both-");
   const initCapture = captureIo();
   const doctorCapture = captureIo();
 
@@ -70,146 +112,226 @@ test("init --agent both adds validator contracts without changing agent destinat
 
   assert.equal(initExit, 0);
   assert.equal(doctorExit, 0);
-  const installedFiles = [
-    "AGENTS.md",
-    "CLAUDE.md",
-    path.join("Codex", "skills", "validate-feature-candidate", "SKILL.md"),
-    path.join(
-      ".ai-playbook",
-      "contracts",
-      "independent-validator",
-      "validate.cjs"
-    ),
-    path.join(
-      ".ai-playbook",
-      "contracts",
-      "independent-validator",
-      "v1",
-      "assignment.schema.json"
-    ),
-    path.join(
-      ".ai-playbook",
-      "contracts",
-      "independent-validator",
-      "v1",
-      "result.schema.json"
-    )
-  ];
-  for (const installedFile of installedFiles) {
-    await fs.access(path.join(target, installedFile));
+  for (const skill of SKILL_NAMES) {
+    await assertExists(target, path.join(".agents", "skills", skill, "SKILL.md"));
+    await assertExists(target, path.join(".claude", "skills", skill, "SKILL.md"));
   }
-  for (const unexpectedFile of [
-    path.join("skills", "validate-feature-candidate", "SKILL.md"),
-    path.join(".claude", "agents", "independent-validator.md")
-  ]) {
-    await assert.rejects(
-      fs.access(path.join(target, unexpectedFile)),
-      (error) => error.code === "ENOENT"
+  for (const reference of PERFORMANCE_BENCHMARKING_REFERENCES) {
+    await assertExists(
+      target,
+      path.join(
+        ".agents",
+        "skills",
+        "performance-benchmarking",
+        "references",
+        reference
+      )
+    );
+    await assertExists(
+      target,
+      path.join(
+        ".claude",
+        "skills",
+        "performance-benchmarking",
+        "references",
+        reference
+      )
     );
   }
-  const installedEvals = await fs.readFile(path.join(target, "evals.md"), "utf8");
-  assert.match(installedEvals, /- Test mapping:/);
-  assert.doesNotMatch(installedEvals, /^-\s+Status:/m);
-  assert.doesNotMatch(installedEvals, /Status Legend/);
-  const installedChecker = require(
-    path.join(
-      target,
-      ".ai-playbook",
-      "contracts",
-      "independent-validator",
-      "validate.cjs"
-    )
+  for (const agent of AGENT_NAMES) {
+    await assertExists(target, path.join(".codex", "agents", `${agent}.toml`));
+    await assertExists(target, path.join(".claude", "agents", `${agent}.md`));
+  }
+  await assertExists(target, "AGENTS.md");
+  await assertExists(target, "CLAUDE.md");
+  await assertExists(
+    target,
+    path.join(".ai-playbook", "contracts", "independent-validator", "validate.cjs")
   );
-  assert.equal(
-    typeof installedChecker.validateIndependentValidatorPair,
-    "function"
+  await assertMissing(
+    target,
+    path.join("Codex", "skills", "validate-feature-candidate", "SKILL.md")
   );
 
-  const doctorOutput = doctorCapture.output.stdout;
-  assert.match(doctorOutput, /OK\s+AGENTS\.md/);
-  assert.match(doctorOutput, /OK\s+CLAUDE\.md/);
-  assert.match(
-    doctorOutput,
-    /OK\s+Codex\/skills\/validate-feature-candidate\/SKILL\.md/
+  const manifest = JSON.parse(
+    await fs.readFile(path.join(target, ".ai-playbook-manifest.json"), "utf8")
   );
-  assert.doesNotMatch(doctorOutput, /\.claude\/agents/);
-  assert.match(doctorOutput, /OK\s+independent-validator\/validate\.cjs/);
-  assert.match(doctorOutput, /OK\s+independent-validator\/v1\/assignment/);
-  assert.match(doctorOutput, /OK\s+independent-validator\/v1\/result/);
+  assert.equal(manifest.layoutVersion, 2);
+  assert.equal(manifest.capabilities.skills.length, SKILL_NAMES.length * 2);
+  assert.equal(manifest.capabilities.agents.length, AGENT_NAMES.length * 2);
+  assert.ok(
+    manifest.managedPaths.includes(
+      path.join(".agents", "skills", "validate-feature-candidate", "SKILL.md")
+    )
+  );
+
+  assert.match(doctorCapture.output.stdout, /OK\s+\.agents\/skills\/app-localization/);
+  assert.match(doctorCapture.output.stdout, /OK\s+\.claude\/skills\/app-localization/);
+  assert.match(
+    doctorCapture.output.stdout,
+    /OK\s+\.agents\/skills\/performance-benchmarking\/references\/methodology\.md/
+  );
+  assert.match(
+    doctorCapture.output.stdout,
+    /OK\s+\.claude\/skills\/performance-benchmarking\/references\/methodology\.md/
+  );
+  assert.match(doctorCapture.output.stdout, /OK\s+\.codex\/agents\/independent-validator/);
+  assert.match(doctorCapture.output.stdout, /OK\s+\.claude\/agents\/independent-validator/);
 });
 
-for (const [agent, workflowPattern, otherWorkflowPath] of [
-  [
-    "codex",
-    /OK\s+Codex\/skills\/validate-feature-candidate\/SKILL\.md/,
-    "CLAUDE.md"
-  ],
-  [
-    "claude",
-    /OK\s+CLAUDE\.md/,
-    path.join("Codex", "skills", "validate-feature-candidate", "SKILL.md")
-  ]
-]) {
-  test(`init and doctor preserve the ${agent} layout with validator contracts`, async (t) => {
-    const target = await fs.mkdtemp(
-      path.join(os.tmpdir(), `ai-playbook-validator-${agent}-`)
-    );
-    t.after(() => fs.rm(target, { recursive: true, force: true }));
+for (const platform of ["codex", "claude"]) {
+  test(`init and doctor install only the ${platform} native capability layout`, async (t) => {
+    const target = await temporaryTarget(t, `ai-playbook-${platform}-`);
     const initCapture = captureIo();
     const doctorCapture = captureIo();
 
-    const initExit = await run(
-      ["init", "--agent", agent, "--target", target],
-      initCapture.io
+    assert.equal(
+      await run(["init", "--agent", platform, "--target", target], initCapture.io),
+      0
     );
-    const doctorExit = await run(
-      ["doctor", "--agent", agent, "--target", target],
-      doctorCapture.io
+    assert.equal(
+      await run(["doctor", "--agent", platform, "--target", target], doctorCapture.io),
+      0
     );
 
-    assert.equal(initExit, 0);
-    assert.equal(doctorExit, 0);
-    assert.match(doctorCapture.output.stdout, workflowPattern);
-    await assert.rejects(
-      fs.access(path.join(target, otherWorkflowPath)),
-      (error) => error.code === "ENOENT"
-    );
-    assert.match(
-      doctorCapture.output.stdout,
-      /OK\s+independent-validator\/validate\.cjs/
-    );
-    assert.match(
-      doctorCapture.output.stdout,
-      /OK\s+independent-validator\/v1\/assignment/
-    );
-    assert.match(
-      doctorCapture.output.stdout,
-      /OK\s+independent-validator\/v1\/result/
-    );
-    await assert.rejects(
-      fs.access(
-        path.join(target, ".claude", "agents", "independent-validator.md")
-      ),
-      (error) => error.code === "ENOENT"
-    );
-    await assert.rejects(
-      fs.access(
-        path.join(target, "skills", "validate-feature-candidate", "SKILL.md")
-      ),
-      (error) => error.code === "ENOENT"
-    );
+    if (platform === "codex") {
+      await assertExists(
+        target,
+        path.join(".agents", "skills", "validate-feature-candidate", "SKILL.md")
+      );
+      await assertExists(
+        target,
+        path.join(".codex", "agents", "independent-validator.toml")
+      );
+      await assertMissing(target, path.join(".claude", "skills"));
+      await assertMissing(target, path.join(".claude", "agents"));
+      await assertMissing(target, "CLAUDE.md");
+    } else {
+      await assertExists(
+        target,
+        path.join(".claude", "skills", "validate-feature-candidate", "SKILL.md")
+      );
+      await assertExists(
+        target,
+        path.join(".claude", "agents", "independent-validator.md")
+      );
+      await assertMissing(target, path.join(".agents", "skills"));
+      await assertMissing(target, path.join(".codex", "agents"));
+      await assertMissing(target, "AGENTS.md");
+    }
   });
 }
 
+test("init preserves existing user capability files unless --force is used", async (t) => {
+  const target = await temporaryTarget(t, "ai-playbook-preserve-");
+  const customSkill = path.join(
+    target,
+    ".agents",
+    "skills",
+    "senior-code-reviewer",
+    "SKILL.md"
+  );
+  await fs.mkdir(path.dirname(customSkill), { recursive: true });
+  await fs.writeFile(customSkill, "user-owned\n", "utf8");
+  const capture = captureIo();
+
+  assert.equal(await run(["init", "--agent", "codex", "--target", target], capture.io), 0);
+  assert.equal(await fs.readFile(customSkill, "utf8"), "user-owned\n");
+  assert.match(capture.output.stdout, /Skipped files \(already existed\)/);
+  const firstManifest = JSON.parse(
+    await fs.readFile(path.join(target, ".ai-playbook-manifest.json"), "utf8")
+  );
+  assert.equal(
+    firstManifest.managedPaths.includes(
+      path.join(".agents", "skills", "senior-code-reviewer", "SKILL.md")
+    ),
+    false
+  );
+  assert.ok(
+    firstManifest.managedPaths.includes(
+      path.join(".agents", "skills", "architecture-reviewer", "SKILL.md")
+    )
+  );
+
+  assert.equal(await run(["init", "--agent", "codex", "--target", target], captureIo().io), 0);
+  const secondManifest = JSON.parse(
+    await fs.readFile(path.join(target, ".ai-playbook-manifest.json"), "utf8")
+  );
+  assert.ok(
+    secondManifest.managedPaths.includes(
+      path.join(".agents", "skills", "architecture-reviewer", "SKILL.md")
+    )
+  );
+
+  const doctorCapture = captureIo();
+  assert.equal(
+    await run(["doctor", "--agent", "codex", "--target", target], doctorCapture.io),
+    1
+  );
+  assert.match(
+    doctorCapture.output.stdout,
+    /BAD\s+\.agents\/skills\/senior-code-reviewer\/SKILL\.md/
+  );
+});
+
+test("init migrates legacy Codex skills without deleting them", async (t) => {
+  const target = await temporaryTarget(t, "ai-playbook-legacy-");
+  const legacySkill = path.join(
+    target,
+    "Codex",
+    "skills",
+    "validate-feature-candidate",
+    "SKILL.md"
+  );
+  await fs.mkdir(path.dirname(legacySkill), { recursive: true });
+  await fs.writeFile(legacySkill, "legacy\n", "utf8");
+
+  const beforeCapture = captureIo();
+  assert.equal(
+    await run(["doctor", "--agent", "codex", "--target", target], beforeCapture.io),
+    1
+  );
+  assert.match(beforeCapture.output.stdout, /WARN legacy Codex\/skills/);
+
+  const initCapture = captureIo();
+  assert.equal(await run(["init", "--agent", "codex", "--target", target], initCapture.io), 0);
+  assert.equal(await fs.readFile(legacySkill, "utf8"), "legacy\n");
+  await assertExists(
+    target,
+    path.join(".agents", "skills", "validate-feature-candidate", "SKILL.md")
+  );
+  assert.match(initCapture.output.stdout, /Legacy Codex\/skills retained/);
+
+  const afterCapture = captureIo();
+  assert.equal(
+    await run(["doctor", "--agent", "codex", "--target", target], afterCapture.io),
+    0
+  );
+});
+
+test("init --dry-run reports native files without writing them", async (t) => {
+  const target = await temporaryTarget(t, "ai-playbook-dry-run-");
+  const capture = captureIo();
+
+  assert.equal(
+    await run(["init", "--agent", "both", "--dry-run", "--target", target], capture.io),
+    0
+  );
+  assert.match(capture.output.stdout, /Would write manifest/);
+  await assertMissing(target, "features.md");
+  await assertMissing(target, ".ai-playbook-manifest.json");
+  await assertMissing(target, path.join(".agents", "skills"));
+  await assertMissing(target, path.join(".claude", "skills"));
+});
+
 test("doctor rejects a corrupted installed validator schema", async (t) => {
-  const target = await fs.mkdtemp(path.join(os.tmpdir(), "ai-playbook-validator-bad-"));
-  t.after(() => fs.rm(target, { recursive: true, force: true }));
+  const target = await temporaryTarget(t, "ai-playbook-validator-bad-");
   const initCapture = captureIo();
   const doctorCapture = captureIo();
 
-  const initExit = await run(
-    ["init", "--agent", "codex", "--target", target],
-    initCapture.io
+  assert.equal(
+    await run(["init", "--agent", "codex", "--target", target], initCapture.io),
+    0
   );
   await fs.writeFile(
     path.join(
@@ -223,15 +345,42 @@ test("doctor rejects a corrupted installed validator schema", async (t) => {
     "",
     "utf8"
   );
-  const doctorExit = await run(
-    ["doctor", "--agent", "codex", "--target", target],
-    doctorCapture.io
+  assert.equal(
+    await run(["doctor", "--agent", "codex", "--target", target], doctorCapture.io),
+    1
   );
-
-  assert.equal(initExit, 0);
-  assert.equal(doctorExit, 1);
   assert.match(
     doctorCapture.output.stdout,
     /BAD\s+independent-validator\/v1\/result\.schema\.json/
+  );
+});
+
+test("doctor rejects a corrupted installed skill reference", async (t) => {
+  const target = await temporaryTarget(t, "ai-playbook-skill-reference-bad-");
+  assert.equal(
+    await run(["init", "--agent", "codex", "--target", target], captureIo().io),
+    0
+  );
+  await fs.writeFile(
+    path.join(
+      target,
+      ".agents",
+      "skills",
+      "performance-benchmarking",
+      "references",
+      "methodology.md"
+    ),
+    "corrupted\n",
+    "utf8"
+  );
+
+  const doctorCapture = captureIo();
+  assert.equal(
+    await run(["doctor", "--agent", "codex", "--target", target], doctorCapture.io),
+    1
+  );
+  assert.match(
+    doctorCapture.output.stdout,
+    /BAD\s+\.agents\/skills\/performance-benchmarking\/references\/methodology\.md/
   );
 });

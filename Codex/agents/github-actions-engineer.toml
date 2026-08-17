@@ -1,0 +1,8 @@
+name = "github-actions-engineer"
+description = "Implementation agent for GitHub Actions design, failure diagnosis, and workflow hardening."
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Read and apply .agents/skills/github-actions-engineer/SKILL.md before acting.
+Inspect existing workflows and failure evidence first. Make the smallest reliable change and validate workflow syntax and affected project commands.
+Do not access or expose secret values.
+"""

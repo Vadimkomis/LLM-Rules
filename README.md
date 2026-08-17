@@ -1,232 +1,201 @@
 <p align="center"> <img src="assets/banner.png?v=3" alt="ai-playbook banner" /> </p>
 
-Centralized AI coding assistant configuration for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and [Codex CLI](https://developers.openai.com/codex/cli/).
+Shared AI coding workflows for
+[Claude Code](https://code.claude.com/docs/en/overview) and
+[Codex](https://developers.openai.com/codex/).
 
-## Table of Contents
+The playbook uses a hybrid model:
 
-- [Structure](#structure)
-- [CLI Quick Start](#cli-quick-start)
-- [Profiles by Stack](#profiles-by-stack)
-- [Setup](#setup)
-  - [Claude Code](#claude-code)
-  - [Codex](#codex)
-- [What's Inside](#whats-inside)
-- [Getting Started with Codex Skills](#getting-started-with-codex-skills)
-- [Shared Independent-Validation Contracts](#shared-independent-validation-contracts)
-- [Updating + Sanity Check](#updating--sanity-check)
-- [Changelog](#changelog)
-- [License](#license)
+- **Skills** contain reusable methods, guardrails, and output contracts.
+- **Agents** preload those skills in isolated contexts with task-appropriate
+  permissions.
+- **Project instructions** contain durable repository-wide expectations.
 
 ## Structure
 
-```
+```text
+.agents/skills/             # Canonical, platform-neutral skill sources
 Claude/
-  ├── CLAUDE.md          # Universal development guidelines (symlinked to ~/.claude/)
-  ├── settings.json      # Claude Code settings
-  ├── statusline.sh      # Status line configuration
-  └── agents/            # Custom agent definitions
-        ├── architecture-reviewer.md
-        ├── code-simplification-architect.md
-        ├── github-actions-engineer.md
-        ├── independent-validator.md
-        ├── red-team-analyst.md
-        ├── senior-code-reviewer.md
-        └── senior-qa-engineer.md
-
+  CLAUDE.md                 # Claude project guidance
+  agents/                   # Thin Claude agent adapters
 Codex/
-  ├── AGENTS.md          # Codex agent and workflow instructions
-  └── skills/            # Reusable Codex skills (plug-and-play)
-        ├── architecture-reviewer/
-        ├── code-simplification-architect/
-        ├── app-localization/
-        ├── github-actions-engineer/
-        ├── devops-engineer/
-        ├── mobile-engineer/
-        ├── red-team-analyst/
-        ├── senior-code-reviewer/
-        ├── senior-qa-engineer/
-        └── validate-feature-candidate/
-
+  AGENTS.md                 # Codex project guidance
+  agents/                   # Thin Codex custom-agent adapters
 contracts/
-  └── independent-validator/
-        └── v1/          # Shared assignment/result schemas and examples
+  independent-validator/    # Shared validation schemas and examples
+templates/
+  common/                   # features.md and evals.md starters
+  profiles/                 # Stack-specific guidance
 ```
 
-## CLI Quick Start
+The canonical skill collection includes architecture review, code review, QA,
+independent candidate validation, red-team analysis, simplification, GitHub
+Actions, DevOps, mobile engineering, app localization, and cross-stack
+performance benchmarking.
 
-Install into any repository with `npx`:
+## Quick Start
+
+Install into a target repository:
 
 ```bash
-# from your target repository root
-npx @vadim/ai-playbook init --agent codex
+# Codex
+npx @vadimkom/ai-playbook init --agent codex
+
+# Claude Code
+npx @vadimkom/ai-playbook init --agent claude
+
+# Both
+npx @vadimkom/ai-playbook init --agent both
 ```
 
-Use `--agent codex` to install `AGENTS.md` and the existing project-local
-`Codex/skills` tree, `--agent claude` to install `CLAUDE.md`, or `--agent both`
-to install both distributions. Every mode also installs the shared validator contracts under
-`.ai-playbook/contracts/independent-validator/v1` and their pair-level semantic
-checker at `.ai-playbook/contracts/independent-validator/validate.cjs`.
+Native destinations are installed automatically:
 
-Useful commands:
+| Mode | Skills | Agents | Instructions |
+|------|--------|--------|--------------|
+| `codex` | `.agents/skills/` | `.codex/agents/` | `AGENTS.md` |
+| `claude` | `.claude/skills/` | `.claude/agents/` | `CLAUDE.md` |
+| `both` | Both skill trees | Both agent trees | Both files |
+
+Every mode also installs `features.md`, `evals.md`, selected stack profiles,
+and the independent-validator contracts under
+`.ai-playbook/contracts/independent-validator/`.
+
+Existing files are preserved unless `--force` is supplied.
+
+## Profiles
+
+The CLI detects supported stacks or accepts explicit profiles:
 
 ```bash
-# list available stack profiles
-npx @vadim/ai-playbook profiles
-
-# install with explicit profile(s)
-npx @vadim/ai-playbook init --profile frontend-react --agent codex
-
-# verify expected files and managed validator-file integrity
-npx @vadim/ai-playbook doctor --agent codex
+npx @vadimkom/ai-playbook profiles
+npx @vadimkom/ai-playbook init --profile frontend-react --agent both
+npx @vadimkom/ai-playbook init --profile mobile-ios --agent codex
 ```
 
-Optional local linking during development:
+Available profiles:
+
+- `frontend-react`
+- `backend-python`
+- `backend-rust`
+- `mobile-ios`
+- `mobile-android`
+
+## Skills and Agents
+
+Use a skill directly when the workflow should stay in the current
+conversation. Use an agent adapter when the task benefits from independent
+criticism, parallel work, a smaller context, noisy-output isolation, or
+restricted permissions.
+
+| Skill | Agent adapter | Typical use |
+|-------|---------------|-------------|
+| `architecture-reviewer` | `architecture-reviewer` | Pre-implementation design review |
+| `senior-code-reviewer` | `senior-code-reviewer` | Read-only change review |
+| `red-team-analyst` | `red-team-analyst` | Adversarial security analysis |
+| `senior-qa-engineer` | `senior-qa-engineer` | Test strategy and implementation |
+| `validate-feature-candidate` | `independent-validator` | Independent immutable-revision validation |
+| `code-simplification-architect` | `code-simplification-architect` | Behavior-preserving refactoring |
+| `github-actions-engineer` | `github-actions-engineer` | CI workflow engineering |
+| `devops-engineer` | — | Infrastructure and delivery |
+| `mobile-engineer` | — | Mobile platform work |
+| `app-localization` | — | Localization and translation resources |
+| `performance-benchmarking` | — | Measured baselines and verified optimization |
+
+### Performance benchmarking from Codex CLI
+
+After installing the playbook, launch Codex from the target repository and
+select the skill with `/skills` or invoke it directly:
 
 ```bash
+npx @vadimkom/ai-playbook init --agent codex
+codex
+```
+
+```text
+$performance-benchmarking Benchmark the parser, establish a baseline, and ask before optimizing production code.
+```
+
+Codex discovers the repository copy under `.agents/skills/`. It can also invoke
+the skill implicitly when a request matches its description.
+
+For non-interactive use, grant workspace writes when the run should create
+benchmark files:
+
+```bash
+codex exec --sandbox workspace-write \
+  '$performance-benchmarking Benchmark the image pipeline and record the baseline.'
+```
+
+The single quotes prevent the shell from expanding `$performance-benchmarking`.
+
+Reviewer agents are non-editing. QA, simplification, and GitHub Actions agents
+may edit the workspace when implementation is requested.
+
+Independent validation must run through a fresh `independent-validator` agent.
+Invoking `validate-feature-candidate` in the implementing conversation provides
+the method but does not create independence.
+
+## Workflow
+
+1. Plan significant work with `architecture-reviewer`.
+2. Implement in the main conversation or a scoped writer agent.
+3. Delegate code review to `senior-code-reviewer`.
+4. Use `red-team-analyst` for security-sensitive changes.
+5. Use `senior-qa-engineer` for test gaps or flaky checks.
+6. Use `performance-benchmarking` for performance-sensitive paths.
+7. Simplify when complexity remains.
+8. Freeze the candidate and use a fresh `independent-validator`.
+
+## Doctor and Legacy Migration
+
+Verify an installation:
+
+```bash
+npx @vadimkom/ai-playbook doctor --agent codex
+npx @vadimkom/ai-playbook doctor --agent both
+```
+
+`doctor` checks the layout-v2 manifest, every installed skill and agent,
+managed validator integrity, and capability metadata.
+
+Versions before layout v2 installed Codex skills under `Codex/skills/`, which
+Codex does not auto-discover as repository skills. Rerun `init --agent codex`
+to install native `.agents/skills/` copies. Legacy files are retained and never
+deleted automatically.
+
+## Independent-Validation Contracts
+
+The `independent-validator` agents and `validate-feature-candidate` skill share
+the versioned assignment and result contracts under
+`contracts/independent-validator/v1`.
+
+Assignments bind acceptance criteria, approved commands, immutable revisions,
+constraints, and artifact paths. Results record revision evidence, executed
+checks, command results, findings, evidence, deterministic failure signatures,
+and validator metadata.
+
+- `pass`: all assigned criteria and checks conclusively pass.
+- `fail`: candidate behavior conclusively violates an assigned criterion.
+- `error`: validation is incomplete or untrustworthy because of assignment,
+  revision, cleanliness, infrastructure, or evidence problems.
+
+The installed zero-dependency checker is
+`.ai-playbook/contracts/independent-validator/validate.cjs`.
+
+## Development
+
+```bash
+npm test
+
+# Test the CLI locally from another repository
 npm link
-ai-playbook init --profile frontend-react --agent codex
+ai-playbook init --agent both
 ```
 
-## Profiles by Stack
-
-```bash
-# iOS
-npx @vadim/ai-playbook init --profile mobile-ios --agent codex
-
-# Android
-npx @vadim/ai-playbook init --profile mobile-android --agent codex
-
-# React
-npx @vadim/ai-playbook init --profile frontend-react --agent codex
-
-# Python
-npx @vadim/ai-playbook init --profile backend-python --agent codex
-
-# Rust
-npx @vadim/ai-playbook init --profile backend-rust --agent codex
-```
-
-## Setup
-
-### Claude Code
-
-For a project-local installation, the CLI copies `CLAUDE.md` and the shared
-validation contracts:
-
-```bash
-# from the target repository root
-npx @vadim/ai-playbook init --agent claude
-npx @vadim/ai-playbook doctor --agent claude
-```
-
-The CLI preserves its existing behavior and does not copy the Claude agent
-collection or alter home-level settings. To share the rules, settings, and agents
-globally, symlink them manually:
-
-```bash
-# Link shared CLAUDE.md (applies to all projects)
-ln -sf /path/to/ai-playbook/Claude/CLAUDE.md ~/.claude/CLAUDE.md
-
-# Link settings
-ln -sf /path/to/ai-playbook/Claude/settings.json ~/.claude/settings.json
-
-# Link custom agents
-ln -sf /path/to/ai-playbook/Claude/agents ~/.claude/agents
-```
-
-The independent validator still needs its versioned contracts in each target
-repository when using the manual setup:
-
-```bash
-mkdir -p /path/to/your-project/.ai-playbook/contracts/independent-validator
-rsync -a /path/to/ai-playbook/contracts/independent-validator/v1 \
-          /path/to/your-project/.ai-playbook/contracts/independent-validator/
-cp /path/to/ai-playbook/src/independent-validator-contracts.js \
-   /path/to/your-project/.ai-playbook/contracts/independent-validator/validate.cjs
-```
-
-Tip: keep ai-playbook in a stable location (e.g. ~/dev/ai-playbook) so symlinks don’t break.
-
-### Codex
-
-Use the Codex playbook in two parts:
-
-1) Project rules: copy or symlink `Codex/AGENTS.md` into your project root so Codex can pick up the shared workflow and guidelines.
-
-```bash
-ln -sf /path/to/ai-playbook/Codex/AGENTS.md /path/to/your-project/AGENTS.md
-```
-
-2) Skills: copy the skills you want into your project (or point Codex to them). Each skill is a small, focused brief you can apply during a session.
-
-```bash
-# Example: bring in a few common skills
-mkdir -p /path/to/your-project/Codex/skills
-rsync -a /path/to/ai-playbook/Codex/skills/architecture-reviewer \
-          /path/to/ai-playbook/Codex/skills/red-team-analyst \
-          /path/to/ai-playbook/Codex/skills/senior-code-reviewer \
-          /path/to/ai-playbook/Codex/skills/senior-qa-engineer \
-          /path/to/ai-playbook/Codex/skills/validate-feature-candidate \
-          /path/to/your-project/Codex/skills/
-
-# Install the shared validation contracts expected by the validator
-mkdir -p /path/to/your-project/.ai-playbook/contracts/independent-validator
-rsync -a /path/to/ai-playbook/contracts/independent-validator/v1 \
-          /path/to/your-project/.ai-playbook/contracts/independent-validator/
-cp /path/to/ai-playbook/src/independent-validator-contracts.js \
-   /path/to/your-project/.ai-playbook/contracts/independent-validator/validate.cjs
-```
-
-## What's Inside
-
-- **CLAUDE.md** — Universal development guidelines: pre-commit workflow, code organization principles, testing requirements, error handling, and code review checklist. Project-specific details (stack, architecture, build commands) belong in each project's own `CLAUDE.md`.
-- **agents/** — Specialized agent definitions for architecture review, code simplification, QA, independent feature validation, code review, red-team security analysis, and GitHub Actions.
-- **AGENTS.md** — Codex-compatible agent and workflow instructions (mirrors Claude guidance, adapted for skills).
-- **skills/** — Reusable Codex skills for targeted tasks (architecture reviews, adversarial security reviews, code reviews, QA, independent feature validation, simplification, GitHub Actions, DevOps, mobile, localization).
-- **contracts/** — Tool-neutral, versioned JSON Schemas and examples shared by the Claude validator role and Codex validation skill.
-
-## Getting Started with Codex Skills
-
-Follow the same usage pattern as in Claude:
-
-1. Plan — apply `skills/architecture-reviewer` to validate the approach
-2. Implement — write the code
-3. Review — apply `skills/senior-code-reviewer` to catch issues
-4. Attack — apply `skills/red-team-analyst` for security-sensitive changes
-5. Localize — apply `skills/app-localization` when adding or auditing translated app copy
-6. Test — apply `skills/senior-qa-engineer` to ensure coverage
-7. Simplify — apply `skills/code-simplification-architect` if the result is complex
-8. Validate — freeze the candidate at an immutable revision, then apply `Codex/skills/validate-feature-candidate` for evidence-backed validation
-
-In Codex CLI, reference the skill by path or name when creating a Task, e.g., "Use Codex/skills/architecture-reviewer on module X; focus on boundaries and failure modes."
-
-## Shared Independent-Validation Contracts
-
-The Claude `independent-validator` role and Codex `validate-feature-candidate` skill use the same v1 assignment and result contracts under `contracts/independent-validator/v1`. Assignments supply acceptance criteria, approved commands, the immutable candidate revision, repository context, constraints, and artifact paths. Results bind the canonical assignment digest and record the inspected revision, outcome, executed checks and command results, structured findings and evidence, deterministic failure signatures, and validator metadata. CLI installations also include the zero-dependency pair-level checker as `.ai-playbook/contracts/independent-validator/validate.cjs`.
-
-`pass` means the candidate satisfies the assigned criteria, `fail` means candidate behavior violates them, and `error` means validation could not complete reliably because of an assignment, revision, infrastructure, or tooling problem. The validator must neither have implemented nor modify the candidate. `ai-playbook init` installs the contracts into `.ai-playbook/contracts/independent-validator/v1` in the target repository.
-
-## Updating + Sanity Check
-
-After updating rules, agents, or skills:
-
-```bash
-# Confirm symlinks resolve correctly
-ls -la ~/.claude
-
-# Optional: verify the target file exists and is readable
-cat ~/.claude/CLAUDE.md | head
-
-# If you vendored Codex skills into a project, re-sync updated skills
-rsync -a /path/to/ai-playbook/Codex/skills/ /path/to/your-project/Codex/skills/
-```
-
-If a symlink is broken, it usually means you moved the repo. Put it somewhere stable and relink.
-
-## Changelog
-
-See `CHANGELOG.md` for version history and release notes.
+The tests cover native installation layouts, legacy migration, file
+preservation, doctor integrity checks, skill metadata and activation fixtures,
+agent permissions, and independent-validator contracts.
 
 ## License
 
-MIT License — See LICENSE file for details.
+MIT — see [LICENSE](LICENSE).

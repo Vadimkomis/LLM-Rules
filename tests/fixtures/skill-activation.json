@@ -1,0 +1,68 @@
+{
+  "app-localization": {
+    "direct": "Use app-localization to add resources for every requested locale in this app.",
+    "indirect": "Audit the UI copy for missing translations and mismatched placeholders.",
+    "incomplete": "Localize this app.",
+    "negative": "Rename this internal analytics event constant."
+  },
+  "architecture-reviewer": {
+    "direct": "Use architecture-reviewer to evaluate this cache design before implementation.",
+    "indirect": "Compare two migration designs and identify boundary and rollback risks.",
+    "incomplete": "Review my architecture idea.",
+    "negative": "Fix this typo in a README."
+  },
+  "code-simplification-architect": {
+    "direct": "Use code-simplification-architect to reduce nesting without changing behavior.",
+    "indirect": "This working service has duplicated validation and an 80-line method.",
+    "incomplete": "Simplify this.",
+    "negative": "Add a new payment provider."
+  },
+  "devops-engineer": {
+    "direct": "Use devops-engineer to design a safe Kubernetes rollout.",
+    "indirect": "We need health checks, observability, and a rollback plan for production.",
+    "incomplete": "Help with deployment.",
+    "negative": "Write a unit test for this parser."
+  },
+  "github-actions-engineer": {
+    "direct": "Use github-actions-engineer to fix this failing workflow.",
+    "indirect": "Our pull-request checks are slow and expose overly broad token permissions.",
+    "incomplete": "CI is broken.",
+    "negative": "Explain a local compiler error unrelated to CI."
+  },
+  "mobile-engineer": {
+    "direct": "Use mobile-engineer to implement this Android lifecycle-aware flow.",
+    "indirect": "The screen loses state after backgrounding and blocks the UI thread.",
+    "incomplete": "Fix the app screen.",
+    "negative": "Optimize a backend SQL query."
+  },
+  "performance-benchmarking": {
+    "direct": "Use performance-benchmarking to baseline and optimize this Rust parser with before-and-after evidence.",
+    "indirect": "Create a representative benchmark for this hot path, profile it, and prove whether the proposed optimization helps.",
+    "incomplete": "Make this code faster and measure it.",
+    "negative": "Refactor these variable names without changing or measuring performance."
+  },
+  "red-team-analyst": {
+    "direct": "Use red-team-analyst to attack this authorization flow.",
+    "indirect": "Try to find privilege escalation and business-logic abuse in checkout.",
+    "incomplete": "Is this secure?",
+    "negative": "Review naming consistency in these tests."
+  },
+  "senior-code-reviewer": {
+    "direct": "Use senior-code-reviewer on the current diff.",
+    "indirect": "Find correctness regressions, security bugs, and missing tests before merge.",
+    "incomplete": "Review my changes.",
+    "negative": "Implement this feature from the approved plan."
+  },
+  "senior-qa-engineer": {
+    "direct": "Use senior-qa-engineer to design regression coverage for this fix.",
+    "indirect": "Find test gaps and diagnose why this test is flaky.",
+    "incomplete": "Test this.",
+    "negative": "Refactor this class without changing its tests."
+  },
+  "validate-feature-candidate": {
+    "direct": "Use validate-feature-candidate through a fresh independent validator.",
+    "indirect": "Validate this immutable commit against the supplied assignment and return a contract result.",
+    "incomplete": "Validate the candidate.",
+    "negative": "Fix the candidate you just implemented."
+  }
+}
